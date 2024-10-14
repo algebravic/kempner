@@ -12,9 +12,13 @@ problem:
 Let $V(n)$ denote the function which takes a positive integer, $n$ and
 uses its base 10 digits in a base 11 representation. Evaluate the
 series
+
 $$S_1 := \sum_{n=1}^\infty \frac{1}{V(n)}$$
+
 and
+
 $$S_2 := \sum_{p, \text{prime}} \frac{1}{V(p)}.$$
+
 We now that both series converge since they are subseries of one
 considered by Kempner (or its generalization).
 The first series can be accurately evaluated using a method of Baillie
