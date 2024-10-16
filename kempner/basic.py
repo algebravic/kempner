@@ -1,13 +1,16 @@
 """
 """
 from typing import Tuple, List, Dict
-from functools import cache
+from functools import cache, reduce
 from itertools import product
 from math import log, floor
 import numpy as np
 from mpmath import mp
 from sympy import sieve
 from pyprimesieve import primes
+from .timeit import Timeit
+
+DUAL = Tuple[mp.mpf, mp.mpf]
 
 class Expander:
     def __init__(self, from_base: int = 10, to_base = 11,
@@ -77,40 +80,59 @@ class Expander:
         
         return (main_term - lcoeff, ucoeff - main_term)
 
+    def coeff_bounds(self, digits: int,
+                     strict: bool = True) -> Tuple[mp.mpf, mp.mpf]:
 
-    def simple_bounds(self, digits: int) -> Tuple[mp.mpf, mp.mpf]:
+        def min_max(arg1: DUAL, arg2: DUAL) -> DUAL:
+
+            return min(arg1[0], arg2[0]), max(arg1[1], arg2[1])
+        
+        lbound = self._from_base ** digits
+        ubound = self._from_base * lbound
+        if not strict:
+
+            boundl = self.log_bound(ubound - 1)[0]
+            boundu = self.log_bound(lbound)[1]
+
+        else:
+            with Timeit("bounds"):
+                boundl, boundu = reduce(min_max,
+                    map(self.log_bound, range(lbound, ubound)))
+            
+        return mp.exp(- boundu), mp.exp(- boundl)
+
+    def simple_bounds(self, digits: int,
+                      strict: bool = True) -> Tuple[mp.mpf, mp.mpf]:
         """
           Find simple lower and upper bounds by exhausting over digits.
           Integers in [lbound, ubound) can be prefixes of all
           integers >= lbound (including primes)
         """
-        lbound = self._from_base ** digits
-        ubound = self._from_base * lbound
-        boundl, boundu = tuple(zip(*map(self.log_bound, 
-            range(lbound, ubound))))
 
         initial = mp.mpf(0.0)
         first = mp.mpf(0.0)
+        lbound = self._from_base ** digits
 
         # Do this in segments
+        with Timeit("series chunks"):
+            for start in range(2, lbound + 1, self._maxsieve):
 
-        for start in range(2, lbound + 1, self._maxsieve):
+                my_primes = primes(start,
+                    min(lbound, start + self._maxsieve) + 1)
 
-            my_primes = primes(start,
-                min(lbound, start + self._maxsieve) + 1)
+                initial += sum((mp.mpf(_) ** (- self._expon)
+                    for _ in my_primes))
+                first += sum((1 / mp.mpf(self.expand(_))
+                    for _ in my_primes))
 
-            initial += sum((mp.mpf(_) ** (- self._expon)
-                for _ in my_primes))
-            first += sum((1 / mp.mpf(self.expand(_))
-                for _ in my_primes))
-
-        print(f"inital = {initial}, first = {first}")
+        print(f"initial = {initial}, first = {first}")
 
         tailvalue = mp.primezeta(self._expon) - initial
         print(f"tail = {tailvalue}")
-
-        lower = first + mp.exp(- max(boundu)) * tailvalue
-        upper = first + mp.exp(- min(boundl)) * tailvalue
+        lmult, umult = self.coeff_bounds(digits, strict = strict)
+        
+        lower = first + lmult * tailvalue
+        upper = first + umult * tailvalue
 
         return lower, upper
 
