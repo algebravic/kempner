@@ -173,3 +173,97 @@ $$\ell_m (P(\alpha) - I_m(\alpha)) \le S_2 -  \sum_{p \le 10^m \text{ prime}} \f
 
 where $\alpha = \log 11 / \log 10$.
 \end{proposition}
+
+* Bounds
+
+The multipliers for the tail of the series are of the form
+$V(a)/(a+1)^\alpha$ and $(V(a) + 0.9)/a^\alpha$, where
+$\alpha = \log 11/ \log 10$. For the simple bound, we need to
+calculate $\max_a V(a)/(a+1)^\alpha$ where $10^c \le a < 10^{c+1}$. It
+appears that the maximum occurs at the very end.  Can we prove this?
+The function is definitely not monotone, as it zig and zags in a
+fractal manner.
+
+Note that if the low order digit of $a$ is $< 9$ then $V(a+1) = V(a) +
+1$.  In that case $V(a+1)/(a+2)^\alpha - V(a)/(a+1)^\alpha$
+is $((V(a) + 1) - V(a)((a+2)/(a+1))^\alpha)/(a+2)^\alpha$. The
+numerator looks to be positive, since $(a+2)/(a+1) = 1 + 1/(a+1)$ is
+only slightly bigger than 1 (at least when $a$ is big enough).
+More generally if $a$ ends in $k$ 9's with a digit smaller than 9 just
+above it, then $V(a+1) = V(a) + 11^k - 9 (11^k-1)/(11 - 1) = V(a) -
+11^k/10 + 9/10$. So for $k > 0$ it appears to go down.
+
+** Upper and lower bounds
+The following appears to be true:
+
+Let $f(a) = V(a)/(a+1)^{\log 11/\log 10}$
+$g(a) = (V(a) + 0.9)/a^{\log 11/\log 10}$.
+
+Then if $c$ is a positive integer
+$f(10^c)  \ge f(10^c + d)$ for $d < 10^c$.
+$g(10^{c+1} - 1) \le g(10^c + d)$ for $d < 10^c$.
+
+Note that $V(10^c) = 11^c$, and $V(10^{c+1} - 1) = (9/10)(11^{c+1} -
+1)$.
+
+So $f(10^c) = 11^c/(10^c + 1)^{\log 11/\log 10}$
+or $f(10^c)^{\log 10/\log 11} = 10^c/(10^c + 1)$
+$f(10^c + d)^{\log 10/\log 11} = V(10^c+d)^{\log 10/\log 11}/(10^c +
+d + 1)$
+
+
+Using the single digit bounds, we have
+
+V(a')/((a'+1)^\alpha) \le V(a)/a^\alpha < (V(a') + 0.9)/({a'}^\alpha}$,
+where $a'$ is the leading digit of $a$.
+
+* Inclusion-Exclusion
+
+One of the sums that must be evaluated in the above is $\sum_{p \in D_A,
+\text{ prime}} \frac{1}{V(p)}$ for some value $A$, where $D_A$ is the
+set of integers $\le A$ with the appropriate digit restriction. Instead of doing
+this directly, one can estimate upper and lower bounds for this via
+inclusion-exclusion. More specifically, using the method of Baillie we
+can accurately compute $\sum{n \in D_A} \frac{1}{V(n)}$. There's a
+more general technique, similar to this, which allows fast calcuation
+of $\sum_{n \in B_A} \frac{1}{n)$, where $B$ is a regular numeration
+set, and $A$ is a bound. More specifically, a *regular numeration set*
+to base $b$ is the set of nonnegative integers, $n$, such that the
+base $b$ representaion of $n$ (say taken least significant digit
+first) is a regular set.
+
+Let $L$ denotes a language on the alphabet $\{0, \dots, b-1\}$, so that
+the final character in a word is not 0. If $w = w_1 \cdots w_r$ is a word
+in $L$, let $\sigma(w) = \sum_{n=0}^r w_i b^i$. The *growth function*
+of $L$ is then defined by be $G_L(x) = \# \{w \in L : \sigma(w) \le
+x\}$.
+
+We note that if $m>1$ is a positive integer, then the set of positive
+integer leaving a remainder of $r$ when divided by $m$ is a regular
+language, in the sense, that the language $\sigma^{-1}(S)$ is regular,
+where $S = \{n \ge 1 : n \equiv r \bmod m\}$. This is easy to see as
+follows: Define a DFA whose state set is $\{0, \dots, m-1\}$, and
+initial state is 0.  If the DFA is in state $i$ at time $t$, and it
+reads the digit $d$ it then transitions to state $(d + t b) \bmod
+m$. The accepting state is $r$. One would like to generalize Baillie's
+method to handle all regular sets.
+
+Here's a start: Let $S$ denote the finite state set of a DFA which
+accepts the language. First, we'd like to be able to compute
+$\# \{ \sigma(w) \le x : w \in L\}$. It's probably not very easy to
+compute this for arbitrary $x$, but it might be sufficient to be able
+to compute this for $x=b^c$, for various nonnegative integers
+$c$. This we can do, since this is just the number of words in $L$ of
+length $< c$. To generalize Baillie's method, define
+$f_{s_1, s_2}(i,k) = \sum_{w \in L(i,s_1, s_2)} 1/\sigma(w)^k$, where
+$L(i,s_1,s_2)$ is the set of words of length $i$ accepted by the DFA
+when started in state $s_1$ with $s_2$ the accepting state.
+
+Baillie's recursion then becomes the following:
+
+$L(i+1, s_1, s_2) = \bigcup_{s \in S, \phi(s,\alpha) = s_2} L(i, s_1,
+s) \alpha$,
+where $\phi$ is the transition function of the DFA. Note that the
+union is disjoint.
+
+
