@@ -3,6 +3,7 @@
 #+latex_header: \usepackage{amsthm}
 #+latex_header: \newtheorem{definition}{Definition}
 #+latex_header: \newtheorem{proposition}{Proposition}
+#+latex_header: \newcommand{\CC}{\mathbb{C}}
 #+Options: toc:nil
 
 * Introduction
@@ -143,20 +144,18 @@ if $n$ and $a$ are positive integers, we say that $n$ \emph{starts with} $a$ if 
 \begin{proposition}
 Let $n$ and $a$ be positive integers.
 If $n$ starts with $a$ then
-\begin{displaymath}
-\frac{V(a)}{(a+1)^\alpha} \le \frac{V(n)}{n^\alpha} < \frac{V(a) + \frac{9}{10}}{a^\alpha},
-\end{displaymath}
+$$\frac{V(a)}{(a+1)^\alpha} \le \frac{V(n)}{n^\alpha} < \frac{V(a) + \frac{9}{10}}{a^\alpha},$$
 where $\alpha = \frac{\log 11}{\log 10}$.
 \end{proposition}
 \begin{proof}
 If $n$ starts with $a$, then
 $a = a \cdot 10^b + c$ with $c < 10^b$. Thus
-$$a \cdot 10^b \le n < (a+1) \cdot 10^b.$$ Rearranging, and taking logarithms yields
-\begin{displaymath}
-\frac{\log n - \log (a+1)}{\log 10}  < b \le \frac{\log n - \log a}{\log 10}.
-\end{displaymath}
+$$a \cdot 10^b \le n < (a+1) \cdot 10^b.$$
+Rearranging, and taking logarithms yields
+$$\frac{\log n - \log (a+1)}{\log 10}  < b \le \frac{\log n - \log a}{\log 10}.$$
 However, we have $V(n) = V(a) 11^b + V(c)$, and $V(c) \le \sum_{i=0}^{b-1} 9 \cdot 11^i = (9/10) (11^b - 1)$.
-Plugging in the bounds for $b$ we get the indicated result
+Thus $V(a) 11^b \le V(n) < (V(a) + 9/10) 11^b$.
+Plugging in the bounds for $b$ we get the indicated result.
 \end{proof}
 
 We first make a simple use of this proposition.
@@ -226,7 +225,7 @@ this directly, one can estimate upper and lower bounds for this via
 inclusion-exclusion. More specifically, using the method of Baillie we
 can accurately compute $\sum{n \in D_A} \frac{1}{V(n)}$. There's a
 more general technique, similar to this, which allows fast calcuation
-of $\sum_{n \in B_A} \frac{1}{n)$, where $B$ is a regular numeration
+of $\sum_{n \in B_A} \frac{1}{n}$, where $B$ is a regular numeration
 set, and $A$ is a bound. More specifically, a *regular numeration set*
 to base $b$ is the set of nonnegative integers, $n$, such that the
 base $b$ representaion of $n$ (say taken least significant digit
@@ -265,5 +264,41 @@ $L(i+1, s_1, s_2) = \bigcup_{s \in S, \phi(s,\alpha) = s_2} L(i, s_1,
 s) \alpha$,
 where $\phi$ is the transition function of the DFA. Note that the
 union is disjoint.
+
+* Fourier series
+The bounds above are still crude. It would be better if we could use
+the individual inequalities for each integer $a$. In order to do this
+we need to evaluate the following series:
+
+$$P_a(s) = \sum_{p \in D_a, \text{ prime}} \frac{1}{p^\alpha},$$
+
+where $D_a$ is the set of integers that start with $a$. We define the
+following function $g_a(x) = 1$ if $x \bmod 1 \in [\log_{10}(a) \mod
+1, \log_{10}(a+1) \bmod 1)$ (with the proviso that the right hand of
+the interval is 1 if $\log_{10}(a+1) \bmod 1 = 0$). Then we have
+
+$$P_a(s) = \sum_{p \ge 10^m, \text{ prime}} \frac{g_a(\log_{10} p)}{p^s},$$
+where $m = \lfloor \log_{10} a\rfloor$. Note that $g_a$ is periodic
+with period 1. Thus we may expand it in a Fourier series:
+
+$g_a(x) = \sum_{n=-\infty}^\infty c_{a,n} \exp(2 \pi i n x).$$
+
+Plugging this is in and rearranging:
+
+$P_a(s) = \sum_{n=-\infty}^\infty c_{a,n}  \sum_{p \ge 10^m,
+\text{ prime}} \frac{1}{p^{s - (2 \pi n)/\log 10)i}.$$
+Thus, since $g_a$ is real valued, we have $\overline{c_{a,n}} =
+c_{a,-n}$ for all $n$. Thus
+$P_a(s)  =c_{a,0} (P(s) - I_m(s)) + \sum_{n=1}^\infty \Re(c_{a,n} (P(s - (2
+\pi n/\log 10) i) - I_m(s - (2 \pi n/\log 10)))).$$
+
+If the coefficients $c_{a,n}$ decay rapidly this would give an
+efficient method to estimate the sum. However, for the function $g_a$,
+they do not. Thus, we seek functions $h_{a,\ell}$ and $h_{a,u}$ which
+are sufficiently smooth, and periodic with period 1, so that their
+Fourier coefficients decay rapidly, and $h_{a,\ell}(x) \le g_a(x) \le
+h_{a,u}(x)$, and $||h_{a,\ell} - h_{a,u}||_\infty \le \varepsilon$,
+for some small $\varepsilon$.
+
 
 
