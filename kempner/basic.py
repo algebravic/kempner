@@ -10,21 +10,33 @@ from sympy import sieve
 from pyprimesieve import primes
 from .timeit import Timeit
 
-DUAL = Tuple[mp.mpf, mp.mpf]
+FLOAT = mp.mpf | np.float64
+DUAL = Tuple[FLOAT, FLOAT]
 
 class Expander:
     def __init__(self, from_base: int = 10, to_base = 11,
                  precision = 50,
                  cutoff: int = 7,
-                 maxsieve: int = 10 ** 7):
+                 maxsieve: int = 10 ** 7,
+                 use_numpy: bool = False):
         self._from_base = from_base
         self._to_base = to_base
         self._cutoff = cutoff
         self._limit = from_base ** cutoff
         self._maxsieve = maxsieve
-        mp.mps = precision
-        self._expon = mp.log(self._to_base) / mp.log(self._from_base)
-        self._incr = mp.mpf(self._from_base - 1) / (self._to_base - 1)
+        if use_numpy:
+            self._float = np.float64
+            self._floor = np.floor
+            self._exp = np.exp
+            self._log = np.log
+        else:
+            mp.mps = precision
+            self._float = mp.mpf
+            self._floor = mp.floor
+            self._exp = mp.exp
+            self._log = mp.log
+        self._expon = self._log(self._to_base) / self._log(self._from_base)
+        self._incr = self._float(self._from_base - 1) / (self._to_base - 1)
         self._table = np.empty(self._limit, dtype = np.int64)
         self.populate()
 
@@ -55,33 +67,33 @@ class Expander:
             mult *= self._to_base
         return res + mult * int(self._table[narg])
 
-    def log_bound(self, arg: int) -> Tuple[mp.mpf, mp.mpf]:
+    def log_bound(self, arg: int) -> Tuple[FLOAT, FLOAT]:
 
         xpn = self.expand(arg)
-        lower = mp.log(xpn) - self._expon * mp.log(arg + 1)
-        upper = (mp.log(xpn + self._incr)
-            - self._expon * mp.log(arg))
+        lower = self._log(xpn) - self._expon * self._log(arg + 1)
+        upper = (self._log(xpn + self._incr)
+            - self._expon * self._log(arg))
         return lower, upper
 
-    def deviation(self, start: int, arg: int) -> mp.mpf:
+    def deviation(self, start: int, arg: int) -> FLOAT:
 
-        digs = int(mp.floor(
-            mp.floor(mp.log(arg) / mp.log(from_base))))
+        digs = int(self._floor(
+            self._floor(self._log(arg) / self._log(from_base))))
         if digs <= start:
             raise ValueError(f"{arg} : {start} >= {digs}")
 
         reduced = arg // 10 ** (digs - start)
-        lcoeff = (mp.log(self.expand(reduced))
-            - self._expon * mp.log(reduced + 1))
-        ucoeff = (mp.log(self.expand(reduced) + self._incr)
-            - self._expon * mp.log(reduced))
-        main_term = (mp.log(self.expand(arg))
-            - self._expon * mp.log(arg))
+        lcoeff = (self._log(self.expand(reduced))
+            - self._expon * self._log(reduced + 1))
+        ucoeff = (self._log(self.expand(reduced) + self._incr)
+            - self._expon * self._log(reduced))
+        main_term = (self._log(self.expand(arg))
+            - self._expon * self._log(arg))
         
         return (main_term - lcoeff, ucoeff - main_term)
 
     def coeff_bounds(self, digits: int,
-                     strict: bool = True) -> Tuple[mp.mpf, mp.mpf]:
+                     strict: bool = True) -> Tuple[FLOAT, FLOAT]:
 
         def min_max(arg1: DUAL, arg2: DUAL) -> DUAL:
 
@@ -99,18 +111,18 @@ class Expander:
                 boundl, boundu = reduce(min_max,
                     map(self.log_bound, range(lbound, ubound)))
             
-        return mp.exp(- boundu), mp.exp(- boundl)
+        return self._exp(- boundu), self._exp(- boundl)
 
     def simple_bounds(self, digits: int,
-                      strict: bool = True) -> Tuple[mp.mpf, mp.mpf]:
+                      strict: bool = True) -> Tuple[FLOAT, FLOAT]:
         """
           Find simple lower and upper bounds by exhausting over digits.
           Integers in [lbound, ubound) can be prefixes of all
           integers >= lbound (including primes)
         """
 
-        initial = mp.mpf(0.0)
-        first = mp.mpf(0.0)
+        initial = self._float(0.0)
+        first = self._float(0.0)
         lbound = self._from_base ** digits
 
         # Do this in segments
@@ -120,9 +132,9 @@ class Expander:
                 my_primes = primes(start,
                     min(lbound, start + self._maxsieve) + 1)
 
-                initial += sum((mp.mpf(_) ** (- self._expon)
+                initial += sum((self._float(_) ** (- self._expon)
                     for _ in my_primes))
-                first += sum((1 / mp.mpf(self.expand(_))
+                first += sum((1 / self._float(self.expand(_))
                     for _ in my_primes))
 
         print(f"initial = {initial}, first = {first}")
@@ -136,9 +148,9 @@ class Expander:
 
         return lower, upper
 
-    def intervals(self, start: int, arg: int) -> mp.mpf:
+    def intervals(self, start: int, arg: int) -> FLOAT:
 
-        digs = int(mp.floor(mp.log(arg) / mp.log(from_base)))
+        digs = int(self._floor(self._log(arg) / self._log(from_base)))
         if digs < start:
             raise ValueError(f"{arg} : {start} > {digs}")
 
@@ -146,10 +158,10 @@ class Expander:
             (self._from_base ** (digs - start)))
         return ucoeff - lcoeff
 
-    def rdeviation(arg: int) -> mp.mpf:
+    def rdeviation(arg: int) -> FLOAT:
 
         xpn0 = self.expand(arg)
         xpn1 = self._expand(arg // from_base)
-        delta = mp.log(xpn0) + mp.log(self._to_base) * mp.log(xpn1)
+        delta = self._log(xpn0) + self._log(self._to_base) * self._log(xpn1)
 
-        return delta + self._expon * mp.log(arg)
+        return delta + self._expon * self._log(arg)
