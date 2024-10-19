@@ -23,8 +23,10 @@ class Expander:
         self._to_base = to_base
         self._cutoff = cutoff
         self._limit = from_base ** cutoff
+        self._tmult = to_base ** cutoff
         self._maxsieve = maxsieve
         if use_numpy:
+            mp.mps = 64
             self._float = np.float64
             self._floor = np.floor
             self._exp = np.exp
@@ -41,6 +43,12 @@ class Expander:
         self.populate()
 
     def populate(self):
+        """"
+          Precompute a table for base conversion
+          cutoff is the exponent of from_base to precompute.
+          It is assumed that that the results will all fit
+          into np.int64.
+        """
 
         self._table[: self._from_base] = np.arange(self._from_base)
         fence = self._from_base
@@ -57,14 +65,15 @@ class Expander:
             ofence *= self._to_base
 
     def expand(self, arg: int) -> int:
+        "Rewrite base from_base digits in base to_base."
 
         res = 0
         narg = arg
         mult = 1
         while narg >= self._limit:
-            res += mult * (narg % self._from_base)
-            narg //= self._from_base
-            mult *= self._to_base
+            res += mult * (narg % self._limit)
+            narg //= self._limit
+            mult *= self._tmult
         return res + mult * int(self._table[narg])
 
     def log_bound(self, arg: int) -> Tuple[FLOAT, FLOAT]:
@@ -126,9 +135,9 @@ class Expander:
         lbound = self._from_base ** digits
 
         # Do this in segments
-        with Timeit("series chunks"):
-            for start in range(2, lbound + 1, self._maxsieve):
-
+        for start in range(2, lbound + 1, self._maxsieve):
+            with Timeit(f"series chunks at {start}"):
+                
                 my_primes = primes(start,
                     min(lbound, start + self._maxsieve) + 1)
 
