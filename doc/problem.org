@@ -1,0 +1,304 @@
+#+Title:  Accurate summation of some number theoretic series
+#+Author: Victor S. Miller
+#+latex_header: \usepackage{amsthm}
+#+latex_header: \newtheorem{definition}{Definition}
+#+latex_header: \newtheorem{proposition}{Proposition}
+#+latex_header: \newcommand{\CC}{\mathbb{C}}
+#+Options: toc:nil
+
+* Introduction
+On the ~math-fun~ mailing list, Neil Sloane posed the following
+problem:
+
+Let $V(n)$ denote the function which takes a positive integer, $n$ and
+uses its base 10 digits in a base 11 representation. Evaluate the
+series
+
+$$S_1 := \sum_{n=1}^\infty \frac{1}{V(n)}$$
+
+and
+
+$$S_2 := \sum_{p, \text{prime}} \frac{1}{V(p)}.$$
+
+We now that both series converge since they are subseries of one
+considered by Kempner (or its generalization).
+The first series can be accurately evaluated using a method of Baillie
+which uses the recursive structure of the set $\{V(n)\}$. However, the
+second series has no such easily seen recursive structure. We first
+describe the method of Baillie, and then give an approach to
+estimating the value of the second series.
+
+In 1914, Kempner considered the summation of subseries of the harmonic
+series:
+
+$$\sum_{n=1}^\infty \frac{1}{n}.$$
+
+It's well known that this series diverges. More specifically
+
+$$\sum_{n=1}^N \frac{1}{n} \sim \log N.$$
+
+However, Kempner noted that
+one restricted the summands to those integers whose base 10
+representation omitted one digit, then the series would converge.
+Later Irwin considered what would happen in one had further
+restrictions on the digits. For example, suppose that at most 2 of the
+digit 1 were allowed.  In all such cases the series would converge. A
+simple way to see this (as noted in Hardy and Wright), is to write
+$s(i)$ to denote the sum of $\frac{1}{n}$ where $n$ has exactly $i$
+digits, and its base 10 reprensentation omits the digit $d$. One notes
+that there are at most $9^i$ terms, and each term is
+$\le \frac{1}{10^{i-1}}$.  Thus the sum in question is
+
+$$\le 9 \sum_{i=1}^\infty \left( \frac{9}{10}\right)^{i-1} = 90.$$
+
+* Baillie's method
+In "Sums of Reciprocals of Integers Missing a Given Digit", Baillie
+gives a method of greatly accelerating the convergence of such series
+to their true value. He notes that straightforward summation converges
+extremely slowly. An argument similar to the above [fn:1] shows that
+
+$$\sum_{i=k}^\infty s(i) \ge \sum_{i=k}^\infty \frac{9^i}{10^i} = 10 (9/10)^k.$$
+
+Baillie's method makes use of the recursive nature of
+the set of allowed integers. More specifically, suppose that we are
+interested in the base $b$ reprentation of integers which omit the
+digit $d$. Baillie generalizes the above. Let $C$ denote the set of
+allowed integers (i.e. those whose base $b$ reprensentation omits the
+digit $d$), and let $C_i$ denote the set of those member of $C$ which
+have exactly $i$ digits, and $D$ the set of allowed digits.
+Then define
+$s(i,j) = \sum_{n \in C_i} \frac{1}{n^j}$. The original sum is then
+$\sum_{i=1}^\infty s(i,1)$. Baillie notes that $C_1 = D \backslash
+\{0\}$ and, for $i > 1$, we have
+
+$$C_i = \{b x + j: x \in C_{i-1}, j=0,\dots, b-1, j \ne d\}.$$
+
+Thus, for $i > 1, j \ge 1$ we have
+$$s(i,j) = \sum_{x \in C_i, k \in D} \left(\frac{1}{bx+k}\right)^j.$$
+
+Using the binomial theorem we have
+
+$$(bx+k)^{-j} = (bx)^j\sum_{n=0}^\infty \binom{-j}{n} \left( \frac{k}{bx}\right)^n.$$
+
+Since this series is absolutely convergent (the  absolute values of
+its terms are
+dominated by the terms of the series $(bx^j)(1-k/(bx))^j$), we have
+$$s(i,j) = \sum_{n=0}^\infty a(j,n) s(i-1,j+n),$$
+where
+$c_n = \sum_{k \in D} k^n$ and $a(j,n) = c_n \binom{-j}{n}/b^{j+n}$
+It is useful to note that $\binom{-j}{n} = (-1)^n
+\binom{j+n-1}{n}$.
+* Bounding the tail of the infinite series
+For proper accuracy one needs an estimate of the
+tail of this series
+$$R(i,j,k) = \sum_{n=k}^\infty a(j,n) s(i,j+n).$$
+
+From the above we have
+
+$$|s(i,j+n)| \le \frac{(b-1)^i}{b^{(i-1)(j+n)}} = b^{j+n}\left(\frac{b-1}{b^{j+n}} \right)^i$$
+
+and
+
+$$|a(j,n)| \le \frac{b^n}{n} \binom{j+n-1}{n} / b^{n+j}.$$
+Thus
+
+$$|R(i,j,k)| \le (b-1)^i b^{-ij} \sum_{n=k}^\infty \binom{j+n-1}{n} b^{-in}.$$
+
+We use the ideas in "Series Acceleration via Negative Binomial
+Probabilities" by Jose Adell. He first define a random variable
+$X_j(t)$, for $j>0$ and integer, and $t>0$, which is a negative binomial variable:
+
+$$\Pr(X_j(t) = k) =  \binom{j+k-1}{k} \left( \frac{t}{t+1} \right)^k (t+1)^{-j} 
+= (t+1)^{-j}\binom{-j}{k} \left(\frac{-t}{t+1}\right)^k.$$
+
+We see that the above upper bound for $|R(i,j,k)|$ is exactly
+$(b-1)^i/(b^i-1)^j \Pr(X_j(1/(b^i-1)) \ge k)$.
+
+He then proves that
+$$\Pr(X_j(t) \ge k) \le C_j(t,k) \left(\frac{t}{t+1}\right)^k,$$
+where $$C_j(t,k) = \left(\frac{k e^{1+j/(2k)}}{j(t+1)} \right)^j.$$
+
+He then considers, for $\theta> 1$ the random variable
+$\theta^{X_j(t)}$. It is straightforward to calculate
+$$E(\theta^{X_j(t)}) = (t+1)^{-j}\sum_{k=0}^\infty \binom{-j}{k}\theta^k
+(-t/(t+1))^k = (1 + t(1- \theta))^{-j}. $$
+The last sum in question is the tail of $(1-b^{-(i-1)})^{-j}$. To get
+a good, but crude, estimate of this consider the ration between
+successive terms of $\binom{j+n-1}{n} x^n$:
+$(1/x) \binom{j+n-1}{n}/\binom{j+n}{n+1} = \frac{n+1}{(j+n)x}$. We
+have $(n+1)/((j+n)x) \le \alpha$ if and only if
+$n(1-\alpha x) \le \alpha j x - 1$. This suggests taking
+$\alpha = 1/x$. Thus
+
+$$|R(i,j,k)| \le \binom{k+n-1}{n} b^{-(i-1)k}(b-1)^k b^{-ij} = \binom{j+k-1}{k} ((b-1)/b^{j+k-1})^i.$$
+
+[fn:1] If $0 \in D$ this needs to be slightly modified since $|C_i| = (b-2)(b-1)^{i-1}$.
+
+* An alternate bound
+
+For an alternate bound we first prove the following:
+
+\begin{definition}
+if $n$ and $a$ are positive integers, we say that $n$ \emph{starts with} $a$ if $n = a \cdot 10^b + c$ for some nonnegative integers $b,c$ with $c < 10^b$.
+\end{definition}
+\begin{proposition}
+Let $n$ and $a$ be positive integers.
+If $n$ starts with $a$ then
+$$\frac{V(a)}{(a+1)^\alpha} \le \frac{V(n)}{n^\alpha} < \frac{V(a) + \frac{9}{10}}{a^\alpha},$$
+where $\alpha = \frac{\log 11}{\log 10}$.
+\end{proposition}
+\begin{proof}
+If $n$ starts with $a$, then
+$a = a \cdot 10^b + c$ with $c < 10^b$. Thus
+$$a \cdot 10^b \le n < (a+1) \cdot 10^b.$$
+Rearranging, and taking logarithms yields
+$$\frac{\log n - \log (a+1)}{\log 10}  < b \le \frac{\log n - \log a}{\log 10}.$$
+However, we have $V(n) = V(a) 11^b + V(c)$, and $V(c) \le \sum_{i=0}^{b-1} 9 \cdot 11^i = (9/10) (11^b - 1)$.
+Thus $V(a) 11^b \le V(n) < (V(a) + 9/10) 11^b$.
+Plugging in the bounds for $b$ we get the indicated result.
+\end{proof}
+
+We first make a simple use of this proposition.
+\begin{proposition}
+Let $m > 1$ be a positive integer. If $s \in \CC, \Re s > 1$, define the \emph{prime zeta function} $P(s) = \sum_{p \text{ prime}} \frac{1}{p^s}$.
+Let $$I_m(s) = \sum_{p \le 10^m \text{ prime}} \frac{1}{p^s}$$
+$$L_m(s) = \sum_{p > 10^m, \text{ prime}} \frac{1}{p^s} = P(s) - I_m(s),$$
+$$\ell_m = 1 / \max_{10^{m-1} \le a < 10^m} (a^\alpha/(V(a)  + 0.9))$$
+$$u_m = 1 / \min_{10^{m-1} \le a < 10^m} ((a+1)^\alpha/(V(a))).$$
+
+ We then have
+
+$$\ell_m (P(\alpha) - I_m(\alpha)) \le S_2 -  \sum_{p \le 10^m \text{ prime}} \frac{1}{V(p)} \le u_m (P(\alpha) - I_m(\alpha)),$$
+
+where $\alpha = \log 11 / \log 10$.
+\end{proposition}
+
+* Bounds
+
+The multipliers for the tail of the series are of the form
+$V(a)/(a+1)^\alpha$ and $(V(a) + 0.9)/a^\alpha$, where
+$\alpha = \log 11/ \log 10$. For the simple bound, we need to
+calculate $\max_a V(a)/(a+1)^\alpha$ where $10^c \le a < 10^{c+1}$. It
+appears that the maximum occurs at the very end.  Can we prove this?
+The function is definitely not monotone, as it zig and zags in a
+fractal manner.
+
+Note that if the low order digit of $a$ is $< 9$ then $V(a+1) = V(a) +
+1$.  In that case $V(a+1)/(a+2)^\alpha - V(a)/(a+1)^\alpha$
+is $((V(a) + 1) - V(a)((a+2)/(a+1))^\alpha)/(a+2)^\alpha$. The
+numerator looks to be positive, since $(a+2)/(a+1) = 1 + 1/(a+1)$ is
+only slightly bigger than 1 (at least when $a$ is big enough).
+More generally if $a$ ends in $k$ 9's with a digit smaller than 9 just
+above it, then $V(a+1) = V(a) + 11^k - 9 (11^k-1)/(11 - 1) = V(a) -
+11^k/10 + 9/10$. So for $k > 0$ it appears to go down.
+
+** Upper and lower bounds
+The following appears to be true:
+
+Let $f(a) = V(a)/(a+1)^{\log 11/\log 10}$
+$g(a) = (V(a) + 0.9)/a^{\log 11/\log 10}$.
+
+Then if $c$ is a positive integer
+$f(10^c)  \ge f(10^c + d)$ for $d < 10^c$.
+$g(10^{c+1} - 1) \le g(10^c + d)$ for $d < 10^c$.
+
+Note that $V(10^c) = 11^c$, and $V(10^{c+1} - 1) = (9/10)(11^{c+1} -
+1)$.
+
+So $f(10^c) = 11^c/(10^c + 1)^{\log 11/\log 10}$
+or $f(10^c)^{\log 10/\log 11} = 10^c/(10^c + 1)$
+$f(10^c + d)^{\log 10/\log 11} = V(10^c+d)^{\log 10/\log 11}/(10^c +
+d + 1)$
+
+
+Using the single digit bounds, we have
+
+V(a')/((a'+1)^\alpha) \le V(a)/a^\alpha < (V(a') + 0.9)/({a'}^\alpha}$,
+where $a'$ is the leading digit of $a$.
+
+* Inclusion-Exclusion
+
+One of the sums that must be evaluated in the above is $\sum_{p \in D_A,
+\text{ prime}} \frac{1}{V(p)}$ for some value $A$, where $D_A$ is the
+set of integers $\le A$ with the appropriate digit restriction. Instead of doing
+this directly, one can estimate upper and lower bounds for this via
+inclusion-exclusion. More specifically, using the method of Baillie we
+can accurately compute $\sum{n \in D_A} \frac{1}{V(n)}$. There's a
+more general technique, similar to this, which allows fast calcuation
+of $\sum_{n \in B_A} \frac{1}{n}$, where $B$ is a regular numeration
+set, and $A$ is a bound. More specifically, a *regular numeration set*
+to base $b$ is the set of nonnegative integers, $n$, such that the
+base $b$ representaion of $n$ (say taken least significant digit
+first) is a regular set.
+
+Let $L$ denotes a language on the alphabet $\{0, \dots, b-1\}$, so that
+the final character in a word is not 0. If $w = w_1 \cdots w_r$ is a word
+in $L$, let $\sigma(w) = \sum_{n=0}^r w_i b^i$. The *growth function*
+of $L$ is then defined by be $G_L(x) = \# \{w \in L : \sigma(w) \le
+x\}$.
+
+We note that if $m>1$ is a positive integer, then the set of positive
+integer leaving a remainder of $r$ when divided by $m$ is a regular
+language, in the sense, that the language $\sigma^{-1}(S)$ is regular,
+where $S = \{n \ge 1 : n \equiv r \bmod m\}$. This is easy to see as
+follows: Define a DFA whose state set is $\{0, \dots, m-1\}$, and
+initial state is 0.  If the DFA is in state $i$ at time $t$, and it
+reads the digit $d$ it then transitions to state $(d + t b) \bmod
+m$. The accepting state is $r$. One would like to generalize Baillie's
+method to handle all regular sets.
+
+Here's a start: Let $S$ denote the finite state set of a DFA which
+accepts the language. First, we'd like to be able to compute
+$\# \{ \sigma(w) \le x : w \in L\}$. It's probably not very easy to
+compute this for arbitrary $x$, but it might be sufficient to be able
+to compute this for $x=b^c$, for various nonnegative integers
+$c$. This we can do, since this is just the number of words in $L$ of
+length $< c$. To generalize Baillie's method, define
+$f_{s_1, s_2}(i,k) = \sum_{w \in L(i,s_1, s_2)} 1/\sigma(w)^k$, where
+$L(i,s_1,s_2)$ is the set of words of length $i$ accepted by the DFA
+when started in state $s_1$ with $s_2$ the accepting state.
+
+Baillie's recursion then becomes the following:
+
+$L(i+1, s_1, s_2) = \bigcup_{s \in S, \phi(s,\alpha) = s_2} L(i, s_1,
+s) \alpha$,
+where $\phi$ is the transition function of the DFA. Note that the
+union is disjoint.
+
+* Fourier series
+The bounds above are still crude. It would be better if we could use
+the individual inequalities for each integer $a$. In order to do this
+we need to evaluate the following series:
+
+$$P_a(s) = \sum_{p \in D_a, \text{ prime}} \frac{1}{p^\alpha},$$
+
+where $D_a$ is the set of integers that start with $a$. We define the
+following function $g_a(x) = 1$ if $x \bmod 1 \in [\log_{10}(a) \mod
+1, \log_{10}(a+1) \bmod 1)$ (with the proviso that the right hand of
+the interval is 1 if $\log_{10}(a+1) \bmod 1 = 0$). Then we have
+
+$$P_a(s) = \sum_{p \ge 10^m, \text{ prime}} \frac{g_a(\log_{10} p)}{p^s},$$
+where $m = \lfloor \log_{10} a\rfloor$. Note that $g_a$ is periodic
+with period 1. Thus we may expand it in a Fourier series:
+
+$g_a(x) = \sum_{n=-\infty}^\infty c_{a,n} \exp(2 \pi i n x).$$
+
+Plugging this is in and rearranging:
+
+$P_a(s) = \sum_{n=-\infty}^\infty c_{a,n}  \sum_{p \ge 10^m,
+\text{ prime}} \frac{1}{p^{s - (2 \pi n)/\log 10)i}.$$
+Thus, since $g_a$ is real valued, we have $\overline{c_{a,n}} =
+c_{a,-n}$ for all $n$. Thus
+$P_a(s)  =c_{a,0} (P(s) - I_m(s)) + \sum_{n=1}^\infty \Re(c_{a,n} (P(s - (2
+\pi n/\log 10) i) - I_m(s - (2 \pi n/\log 10)))).$$
+
+If the coefficients $c_{a,n}$ decay rapidly this would give an
+efficient method to estimate the sum. However, for the function $g_a$,
+they do not. Thus, we seek functions $h_{a,\ell}$ and $h_{a,u}$ which
+are sufficiently smooth, and periodic with period 1, so that their
+Fourier coefficients decay rapidly, and $h_{a,\ell}(x) \le g_a(x) \le
+h_{a,u}(x)$, and $||h_{a,\ell} - h_{a,u}||_\infty \le \varepsilon$,
+for some small $\varepsilon$.
+
+
+
