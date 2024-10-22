@@ -13,6 +13,7 @@ matplotlib = "^3.9.2"
 sympy = "^1.13.3"
 scipy = "^1.14.1"
 pyprimesieve = "^0.1.6"
+pywavelets = "^1.7.0"
 
 
 [build-system]
