@@ -1,0 +1,309 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\newtheorem{lemma}[section]{Lemma}
+\newtheorem{theorem}[section]{Theorem}
+\newtheorem{corollary}[section]{Corollary}
+\newtheorem{proposition}[section]{Proposition}
+\newtheorem{definition}[section]{Definition}
+\newtheorem{notation}[section]{Notation}
+\newcommand{\lemref}[1]{lemma~\ref{lem:#1}}
+\newcommand{\corref}[1]{lemma~\ref{cor:#1}}
+\newcommand{\propref}[1]{lemma~\ref{prop:#1}}
+\newcommand{\defref}[1]{lemma~\ref{def:#1}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\NN}{\mathbb{N}}
+\title{A Kempner like series with primes}
+\author{Victor S. Miller}
+\begin{document}
+\maketitle
+\begin{abstract}
+  Neil Sloane posed the following problem: For a nonnegative integer
+  $n$ let $V(n)$ be the function obtained by using the base 10 digits
+  of $n$ as base 11 digits. It is straightforward to see that the
+  series $\sum_{n=1}^\infty \frac{1}{V(n)}$ converges. Thus the series
+  $\sum_{p \text{ prime}} \frac{1}{V(p)}$ also converges. The problem
+  is to obtain a good approximation to its value. In order to do this
+  we construct a sequence of increasingly good approximations to its
+  value obtained as certain linear combination of values of the
+  \emph{prime zeta function}
+  $Z(s) := \sum_{p \text{ prime}} \frac{1}{p^s}$.
+\end{abstract}
+
+\section{The Problem}
+\label{sec:problem}
+
+It is well known that the \emph{harmonic series}
+\begin{displaymath}
+  \sum_{n=1}^\infty \frac{1}{n}
+\end{displaymath}
+diverges. In fact, we have
+\begin{displaymath}
+  \sum_{n=1}^n \frac{1}{n} \sim \log N
+\end{displaymath}
+as $n \rightarrow \infty$.
+
+Kempner in \cite{kempner1914curious}
+considered series of the form
+\begin{displaymath}
+  \sum_{n \in C} \frac{1}{n},
+\end{displaymath}
+where $C$ is a set of nonnegative integers whose base $b$
+representation does not use a particular ``digit'' $0 \le c <
+b$. Kempner pointed out that such series converge.
+
+Neil Sloane asked about evaluating the following two series
+\begin{equation}
+  \label{eq:sloane1}
+  \sum_{n=1}^\infty \frac{1}{V(n)}
+\end{equation}
+and
+\begin{equation}
+  \label{eq:sloane2}
+  \sum_{p \text{ prime}} \frac{1}{V(p)},
+\end{equation}
+where $V(n)$ is the function from nonnegative integers to
+nonnegative integers which uses the base 10 digits of $n$ as base 11
+digits. It's easy to see that \eqref{eq:sloane1} is one of Kempner's
+series.  This follows since we may interpret the set
+$\{V(n) : n \in \NN\}$ as the set of integers whose base 11
+representation does not use the ``digit'' 10.  Since
+\eqref{eq:sloane2} is a subseries of \eqref{eq:sloane1}, it too
+converges.
+
+In \cite{baillie2008summing} the author describes an efficient
+algorithm to find good approximations to the sums of a Kempner series.
+
+One way to specify this is to require that
+\begin{equation}
+  \label{eq:basic}
+  V(10 n + a) = 11 V(n) + a,
+\end{equation}
+for all integers $n \ge 0, 0 \le a < 10$. Note that $V(a) = a$ for all
+$0 \le a < 10$ follows immediately. Note further that if $0 \le a <
+10^b$ for some $b > 0$ then $V(a) < 11^b$.
+
+
+A particular case of a ``Kempner'' series is
+\begin{displaymath}
+  \sum_{n=1}^\infty \frac{1}{V(n)}.
+\end{displaymath}
+ 
+In this paper we consider the series
+\begin{equation}
+  \label{eq:main:series}
+  \sum_{p \text{ prime}} \frac{1}{V(p)}.
+\end{equation}
+Since the set of terms of this series is a subset of the terms of
+\eqref{eq:basic} it, too, converges. Our goal is to find a good
+approximation for its value. Direct summation of this series converges
+excruciatingly slowly. Instead we express the value in terms of values
+of the \emph{prime zeta function}.
+
+In order to find a good approximation to the value of this series we
+proceed as follows:
+
+\begin{enumerate}
+\item We find good upper and lower bounds for $V(p)$ which only depend
+  on $p$ and the high order digits of $p$.
+\item We write the series \eqref{eq:main:series} as a sum of a finite
+  set of sub-series
+  each of which depends on the high order decimal digits of the prime
+  $p$.
+\item We evaluate each such series by using Fourier analysis to get
+  good smooth upper and lower approximations for the characteristic
+  functions of an interval, and use the Fourier coefficients of these
+  functions as coefficients of values of the prime zeta function.
+\end{enumerate}
+\section{Decomposition}
+\label{sec:decomp}
+
+\begin{theorem}
+  \label{thm:main}
+  Let $b$ be a positive integer. For each integer $10^b \le a <
+  10^{b+1}$ there are complex numbers $c_{a, j}$ such that
+  \begin{equation}
+    \label{eq:decomp}
+    \sum_{p \text{ prime}} \frac{1}{V(p)} = \sum_{p < 10^b, \text{
+        prime}}\frac{1}{V(p)} + \sum_{10^b \le a < 10^{b+1}}
+    \sum_{j=1}^\infty \Re c_{a,j}Z_b\left(\frac{\log 11}{\log 10} + 2 \pi i a j\right),
+  \end{equation}
+  where $Z_b(s) := \sum_{p \ge 10^b \text{ prime}} \frac{1}{p^s}$ is
+  the truncated \emph{prime zeta function}. Morevor the coefficients
+  $c_{a,j}$ decay super polynomially with $j$.
+\end{theorem}
+\begin{lemma}
+  \label{lem:recursion}
+  Let $n \ge 0, b > 0, 0 \le c < 10^b$ be integers. Then we have
+  \begin{equation}
+    \label{eq:recur}
+    V(10^b n + c) = V(n) 11^b + V(c).
+  \end{equation}
+\end{lemma}
+\begin{proof}
+  We use induction on $b$. The base case is in the definition of $V$.
+  We then have, for $0 \le c < 10^{b+1}$, $c = 10^b c' + c''$ with $0
+  \le c' < 10, 0 \le c'' < 10^b$
+  \begin{displaymath}
+    \begin{aligned}[t]
+      V(10^{b+1}n + c) & = V(10^b (10n + c') + c'') \\
+      & = V(10n + c') 10^b + V(c'') \\
+      & = (11 V(n) + c') 11^b + V(c'') \\
+      & = 11^{b+1} V(n) + V(c),
+    \end{aligned}
+  \end{displaymath}
+  The second and fourth equalities are by induction, and the third
+  equality is by definition of $V$.
+\end{proof}
+\begin{definition}
+  If $n \ge 0, a > 0$ we say that the base 10 expansion of $n$
+  \emph{starts with $a$} if, for some integer $b \ge 0$, we have
+  \begin{equation}
+    \label{eq:bracket}
+    a 10^b \le n \le a 10^b + 10^b - 1.
+  \end{equation}
+\end{definition}
+\begin{notation}
+  \label{not:starts}
+  Given an integer $a \ge 1$ define the function $\chi_a: \NN
+  \rightarrow \{0,1\}$ by $\chi_a(n) = 1$ if $n$ starts with $a$ and 0
+  otherwise.
+\end{notation}
+\begin{lemma}
+  \label{lem:covering}
+  Every integer $n \ge 10^b$ starts with some element of the set
+  $S = \{a \in \ZZ: 10^b \le a < 10^{b+1}\}$.
+\end{lemma}
+\begin{proof}
+  Let $d = \lfloor \frac{\log n }{\log 10}\rfloor$,
+  then $d \ge b$ and $10^d \le n < 10^{d+1}$. Let
+  $a = \lfloor \frac{n}{10^{d-b}} \rfloor$. Then
+  $10^b \le a < 10^{b+1}$ and
+  $a 10^{d-b} \le n < (a+1) 10^{d-b}$. Thus $n$ starts with $a \in S$.
+\end{proof}
+\begin{proposition}
+  \label{prop:expansion}
+  Let $b \ge 0$ be an integer. Then
+  \begin{equation}
+    \label{eq:decomposition}
+    \sum_{p \text{ prime}} \frac{1}{V(p)} =
+    \sum_{p < 10^b \text{ prime}} \frac{1}{V(p)} +
+    \sum_{10^b \le a < 10^{b+1}} \sum_{p > 10^b \text{ prime}} \frac{\chi_a(p)}{V(p)}.
+  \end{equation}
+\end{proposition}
+\begin{proposition}
+  \label{prop:bounds}
+  Let $a > 0, n > 0$ be integers. If the base 10 expansion of
+  $n$ starts with $a$
+  then
+  \begin{equation}
+    \label{eq:leading:digits}
+    \left( \frac{V(a)}{(a+1)^{\log 11/\log 10}}\right)
+      n^{\frac{\log 11}{\log 10}}
+      < V(n) < 
+      \left( \frac{V(a) + 9/10}{a^{\log 11/\log 10}}\right)
+      n^{\frac{\log 11}{\log 10}}.
+  \end{equation}
+\end{proposition}
+\begin{proof}
+  If there is a $b \ge 0 $ such that \eqref{eq:bracket} holds, there is an integer $0 \le c < 10^b$
+  such that $n = a 10^b + c$. Thus $V(n) = V(a) 11^b + V(c)$ by
+  \lemref{recursion}. However $0 \le V(c) \le \sum_{j=0}^{b-1} 9 \cdot
+  11^j < (9/10) 11^b$.
+  Thus
+  \begin{equation}
+    \label{eq:vbracket}
+    V(a) 11^b \le V(n) < (V(a) + 9/10)11^b.
+  \end{equation}
+  The equation \eqref{eq:leading:digits} follows from the inequality
+  \eqref{eq:bracket} by taking logarithms:
+  \begin{displaymath}
+    \frac{\log n}{\log 10} - \frac{\log(a+1)}{\log 10} < b
+    \le \frac{\log n}{\log 10} - \frac{\log a}{\log 10},
+  \end{displaymath}
+  and substituting into \eqref{eq:vbracket}.
+
+\end{proof}
+If we take $b=0$ and set $\gamma = \min_{a=1}^9
+\frac{V(a)}{(a+1)^{\frac{\log 11}{\log 10}}} > 0$, then $V(n) > \gamma n^{\log 11/\log 10}$.
+Thus the series $\sum_n \frac{1}{V(n)}$ is bounded
+term by term by the series $\sum_n \frac{1}{\gamma n^{\log 11/\log
+    10}}$ which is absolutely convergent.
+\begin{definition}
+  The \emph{prime zeta function}
+  \begin{displaymath}
+    Z(s) := \sum_{p \text{ prime}} \frac{1}{p^s},
+  \end{displaymath}
+  where $s \in \CC, \Re s > 1$.
+\end{definition}
+\begin{lemma}
+  \label{lem:interval}
+  Let $a$ be a positive integer, $b = \lfloor \log a/\log 10\rfloor$,
+  and $F(x) := x - \lfloor x \rfloor$, the fractional part of $x$.
+  Define the interval $I_a = [F(\log a/\log 10), F(\log (a+1)/\log
+  10)$ if $a < 10^b-1$. If $a=10^b-1$, then $I_a = [F(\log a/\log
+  10), 1)$.
+  A positive integer $n\ge 10^b$ starts with $a$ if and only if
+  $F(\log n\log 10) \in I_a$.
+\end{lemma}
+\begin{proof}
+  By definition, $n$ starts with $a$ if $a 10^c \le n < (a+1)10^c$,
+  for some integer $c$. By definition,
+  $F(\log a/\log 10) = \log a/\log 10 - b$, where $b = \lfloor \log
+  a/\log 10 \rfloor$. Thus
+  \begin{displaymath}
+    \log a/\log 10 -b \le \log n/\log 10 - c -b < \log(a+1)/\log 10 - b.
+  \end{displaymath}
+\end{proof}
+\begin{lemma}
+  \label{lem:upper:bound}
+  Let $\Phi(x)$ be a integrable function supported in $[-1,1]$ such
+  that $\Phi(x) \ge 0$, and $\int_{-1}^1 \Phi(x) = 1$.  For
+  $\frac{1}{4} \ge \varepsilon > 0$, set
+  $\Phi_\varepsilon(x) := \varepsilon^{-1} \Phi \left(
+    \frac{x}{\varepsilon} \right)$.  Given $a < b$, and $\delta$ Let
+  $f_\delta(x)=1$ if $a + \delta \le x \le b - \delta$, and and 0
+  otherwise. Then
+  $0 \le \Phi_\varepsilon \star f_\delta(x) \le f_0(x)$ for all $x$,
+  if $\delta \ge 0$ and
+  $\Phi_\varepsilon \star f_\delta(x) \ge f_0(x)$is $\ge f_0(x)$ if $\delta < 0$.
+\end{lemma}
+\begin{proof}
+  Define $\Psi(x) = \int_{\max(-1, x)}^{\min(1,x)} \Phi(t) dt$. Then
+  $\Psi(x) = 0$ if $x \le -1$, $\Psi(x) = 1$ if $x \ge 1$ and $\Psi(x)$
+  is non-decreasing.
+  We have
+  \begin{displaymath}
+    \begin{aligned}
+      \Phi_\varepsilon \star f_\delta(x) & = \varepsilon^{-1}\int_{a +
+      \delta}^{b - \delta}
+      \Phi((x - t)/\varepsilon) dt \\
+      & = \Psi((x-a - \delta)/\varepsilon) -
+      \Psi((x-b+\delta)/\varepsilon) \le 1.
+    \end{aligned}
+  \end{displaymath}
+If $(x-b + \delta)/\varepsilon \ge 1$ or $(x-a-\delta)/\varepsilon \le
+-1$ the right hand side is 0. Those conditions are $x \ge b + \varepsilon
+- \delta$ or $x \le a - \varepsilon + \delta$. If $\delta = \epsilon$
+this then shows that $0 \le \Phi_\varepsilon \star f_\varepsilon(x) \le f_0(x)$.
+On the other hand, if $x \ge a + \varepsilon + \delta$, and $x \le b -
+\delta - \varepsilon$ then the right hand side is 1.
+If $\delta = - \varepsilon$, this shows that $\Phi_\varepsilon \star
+f_{-\varepsilon}(x) \ge f_0(x)$.
+On the other hand, we have $||f_\varepsilon - f_{-\varepsilon}||_1 = 4
+\varepsilon$. Thus $||\Phi_\varepsilon \star f_\varepsilon - 
+\Phi_\varepsilon \star f_{-\varepsilon}||_\infty \le 4 \varepsilon
+||\Phi_\varepsilon||_\infty \le 4 \varepsilon$.
+\end{proof}
+If we pick a function $\Phi$ as above which is $\mathcal{C}^\infty$
+and has all derivatives at $1$ and $-1$ equal to 0, then convolving it
+with the indicator function of an interval will produce a ``nice''
+function 
+\nocite{johnson2015saddle}
+\bibliography{series}
+\bibliographystyle{plain}
+\end{document}

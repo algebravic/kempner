@@ -1,0 +1,119 @@
+#+Title: smooth upper and lower approximations of indicator function
+
+* From  math.stackexchange.com
+[[https://math.stackexchange.com/questions/101480/are-there-other-kinds-of-bump-functions-than-e-frac1x2-1][Are there other kinds of bump functions than $e^{\frac{1}{x^2-1}}$]]
+by KellyKelly
+
+How would I construct Schwartz functions
+$f_1^\varepsilon, f_2^\varepsilon$ on $\mathbb{R}$ such that $f_1^\varepsilon(x) \le
+1_{[a,b]}(x) \le f_2^\varepsilon(x)$ and
+$f_1^\varepsilon \rightarrow 1_{[a,b]}$, $f_1^\varepsilon \rightarrow 1_{[a,b]}$ as $\varepsilon \rightarrow 0$.
+
+where $a < b$ are real numbers and $1_{[a,b]}$ is the indicator function?
+
+asked Nov 12, 2012 at 5:25
+
+The quickest way is to convolve the characteristic function of another
+interval with a smooth [[https://en.wikipedia.org/wiki/Bump_function][bump function]].  Let $\Phi(x)=c \exp(- 1/(1-x^2))
+\chi(-1,1)$, where $c > 0$ is chosen to make $\int_{-1}^1 \Phi(x) dx =
+1$. For $\varepsilon > 0$ define $\Psi_\varepsilon(x) =
+\varepsilon^{-1} \Phi(x/\varepsilon)$ The convolutions
+$f_1^\varepsilon = 1_{[a+\varepsilon, b - \varepsilon]} \star
+\Psi_\varepsilon$ and $f_1^\varepsilon = 1_{[a-\varepsilon, b +
+\varepsilon]} \star \Psi_\varepsilon$ have the required properties,
+which I leave for you to check.
+
+answered Dec 17, 2012 at 6:03
+** My check
+
+Since $\Phi_\varepsilon(x) \ge 0$, we have $\Phi_\varepsilon \star
+I_{[a-\varepsilon,b + \varepsilon]}(y)  =
+\int_{y - b-\varepsilon}^{y - a+\varepsilon} \Phi_\varepsilon( x) dx$.
+
+However $\Phi_\varepsilon$ is supported on $(-\varepsilon,
+\varepsilon)$ so the above integral is
+$\int_{\max(y - b - \varepsilon,- \varepsilon)}^{\min(y-a-\varepsilon,
+\varepsilon)} \Phi_\varepsilon(x)dx$.
+
+If $y \in [a, b]$ the limits of the above integral are $(-\varepsilon,
+\varepsilon)$, in which case the integral is 1 by construction, and so
+is $\ge I_{[a,b]}(y)$. Otherwise the integral is $\ge 0$ by
+construction, and so is also $\ge I_{[a,b]}(y)$. In that case the
+integral is $\le 2 \varepsilon$ since $\Phi_\varepsilon(x) \le 1$.
+
+A similar argument works with the lower bound.
+
+* Answer from  Fallen Apart
+edited Dec 19, 2016 at 20:16
+answered Dec 19, 2016 at 17:04
+
+There is even simpler example from this book of Loring Tu.
+You simply start with
+$$f(t) = \begin{cases} 0 & t \le 0 \\ e^{-1/t} & t > 0 \end{cases}.$$
+
+Then you define
+$g(t) = \frac{f(t)}{f(t) + f(1-t)}$
+and shift it to the right by creating
+$h(t) = g(t-1)$
+To make it symmetric you put
+$k(t) = h(t^2)$
+and finally to make it look like bump function you put
+$\rho(t) = 1-k(t)$.
+
+As you can tell from the picture, Loring Tu covered more general case
+(he even generalised this construction to smooth manifolds of
+arbitrary dimension).
+
+For more details and picutres go to Tu's book.
+
+* Answer from Robert Israel
+edited Jan 23, 2012 at 1:32
+answered Jan 23, 2012 at 1:15
+
+Presumably what you want is a function that is $\mathcal{C}^\infty$
+on $\mathbb{R}$, nonzero on $(−1,1)$ and zero elsewhere. It's
+convenient to use something involving the exponential function because
+it's nonzero everywhere but goes to faster than any polynomial at
+$-\infty$ and it's easy to differentiate. If you really want to avoid
+the exponential function, you might try something like
+$1/I_0(1/(1-x^2))$, for $-1 < x < 1$, where $I_0$ is a modified Bessel function of order 0.
+
+For an example that has a closed-form antiderivative, you might try
+$\frac{(x^2+1)e^{\frac{4x}{x^2-1}}}{\left( (x^2-1)\left( 1+e^{\frac{4x}{x^2-1}}\right)\right)^2}$
+
+* Answer by Abhimanyu Pallavi Sudhir
+edited May 22, 2019 at 21:13
+answered May 22, 2019 at 18:36
+
+1) Start with any function $f(x)$ that grows faster than all
+   polynomials i.e. $\forall N, \lim_{x \rightarrow
+   \infty}\frac{x^N}{f(x)} = 0$. For example, $e^x$.
+2) Then consider the function $g(x) = \frac{1}{f(1/x)}$. This is a
+   function that is flatter than all polynomials near zero,
+   i.e. $\forall N, \lim_{x\rightarrow 0}\frac{g(x)}{x^N} = 0$. This
+   is a smooth non-analytic function. For the above example you get $e^{-1/x}$.
+3) Consider the function $h(x) = g(1+x) g(1-x)$. This, after zeroing
+   out the stuff outside the interval $(-1,1)$, is a bump
+   function. For our example $e^{2/(x^2-1)}$
+4) Scale and transform to your liking.
+Just do this with different kinds of of growth functions $f$, and
+you'll get different "kinds" of bump functions, $h$. So here are some
+functions that I could generated with this method - try to guess which
+functions they're from:
+
+$h(x) = e^{2/(x^2-1)}$
+
+$h(x) = (1+x)^{1/(1+x)}(1-x)^{1/(1-x)}$
+
+$h(x) = \frac{1}{\frac{1}{1+x}!\frac{1}{1-x}!}$
+
+$h(x) = e^{-\ln^2(1+x) +\ln^2(1-x)}$.
+
+And the more rapidly your function $f(x)$ grows, the nicer the bump
+function $h(x)$ looks.
+
+* 
+[[https://thewindingnumber.blogspot.com/2019/05/whats-with-e-1x-on-smooth-non-analytic.html][What's with e^(-1/x)? On smooth non-analytic functions: part I]]
+
+
+
