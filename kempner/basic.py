@@ -63,7 +63,6 @@ class Expander:
                                              + addend)
             fence *= self._from_base
             ofence *= self._to_base
-
     def expand(self, arg: int) -> int:
         "Rewrite base from_base digits in base to_base."
 
@@ -71,7 +70,7 @@ class Expander:
         narg = arg
         mult = 1
         while narg >= self._limit:
-            res += mult * (narg % self._limit)
+            res += mult * self._table[narg % self._limit]
             narg //= self._limit
             mult *= self._tmult
         return res + mult * int(self._table[narg])
