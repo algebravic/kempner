@@ -45,7 +45,7 @@ restrictions on the digits. For example, suppose that at most 2 of the
 digit 1 were allowed.  In all such cases the series would converge. A
 simple way to see this (as noted in Hardy and Wright), is to write
 $s(i)$ to denote the sum of $\frac{1}{n}$ where $n$ has exactly $i$
-digits, and its base 10 reprensentation omits the digit $d$. One notes
+digits, and its base 10 representation omits the digit $d$. One notes
 that there are at most $9^i$ terms, and each term is
 $\le \frac{1}{10^{i-1}}$.  Thus the sum in question is
 
@@ -61,9 +61,9 @@ $$\sum_{i=k}^\infty s(i) \ge \sum_{i=k}^\infty \frac{9^i}{10^i} = 10 (9/10)^k.$$
 
 Baillie's method makes use of the recursive nature of
 the set of allowed integers. More specifically, suppose that we are
-interested in the base $b$ reprentation of integers which omit the
+interested in the base $b$ representation of integers which omit the
 digit $d$. Baillie generalizes the above. Let $C$ denote the set of
-allowed integers (i.e. those whose base $b$ reprensentation omits the
+allowed integers (i.e. those whose base $b$ representation omits the
 digit $d$), and let $C_i$ denote the set of those member of $C$ which
 have exactly $i$ digits, and $D$ the set of allowed digits.
 Then define
@@ -281,16 +281,22 @@ $$P_a(s) = \sum_{p \ge 10^m, \text{ prime}} \frac{g_a(\log_{10} p)}{p^s},$$
 where $m = \lfloor \log_{10} a\rfloor$. Note that $g_a$ is periodic
 with period 1. Thus we may expand it in a Fourier series:
 
-$g_a(x) = \sum_{n=-\infty}^\infty c_{a,n} \exp(2 \pi i n x).$$
+$$g_a(x) = \sum_{n=-\infty}^\infty c_{a,n} \exp(2 \pi i n x).$$
 
 Plugging this is in and rearranging:
 
-$P_a(s) = \sum_{n=-\infty}^\infty c_{a,n}  \sum_{p \ge 10^m,
-\text{ prime}} \frac{1}{p^{s - (2 \pi n)/\log 10)i}.$$
-Thus, since $g_a$ is real valued, we have $\overline{c_{a,n}} =
+$$P_a(s) = \sum_{n=-\infty}^\infty c_{a,n}
+\sum_{p \ge 10^m, \text{ prime}}
+\frac{1}{p^{s - \frac{2 \pi n}{\log 10}i}}.$$
+Since $g_a$ is real valued, we have $\overline{c_{a,n}} =
 c_{a,-n}$ for all $n$. Thus
-$P_a(s)  =c_{a,0} (P(s) - I_m(s)) + \sum_{n=1}^\infty \Re(c_{a,n} (P(s - (2
-\pi n/\log 10) i) - I_m(s - (2 \pi n/\log 10)))).$$
+\begin{displaymath}
+\begin{aligned}
+$$P_a(s) &= c_{a,0} (P(s) - I_m(s))
++ \sum_{n=1}^\infty
+ \Re \left(c_{a,n} P\left(s - \frac{2 \pi n}{\log 10} i\right)\right) \\ &  - I_m\left(s - \frac{2 \pi n}{\log 10}i\right).
+\end{aligned}
+\end{displaymath}
 
 If the coefficients $c_{a,n}$ decay rapidly this would give an
 efficient method to estimate the sum. However, for the function $g_a$,
@@ -299,6 +305,28 @@ are sufficiently smooth, and periodic with period 1, so that their
 Fourier coefficients decay rapidly, and $h_{a,\ell}(x) \le g_a(x) \le
 h_{a,u}(x)$, and $||h_{a,\ell} - h_{a,u}||_\infty \le \varepsilon$,
 for some small $\varepsilon$.
+
+** The Fourier coefficients of the characteristic function of an interval
+Let $\alpha < \beta < \alpha + 1$ be real. Then define
+$$g_{\alpha,\beta}(x) =
+\begin{cases}
+1 & \text{if } \alpha \le x + a \le \beta \text{ for some integer } a
+\\
+0 & \text{otherwise}
+\end{cases}.
+$$
+Then $\widehat{g_{\alpha,\beta}}(n) := \int_{0}^1 g_{\alpha, \beta}(x)
+e(- n x) dx$, where $e(x) = \exp(2 \pi i x)$, is the fourier
+coefficient of $g_{\alpha, \beta}$.
+
+We compute this directly:
+\begin{displaymath}
+\begin{aligned}
+& =\frac{\exp(-2 \pi \beta i x) - \exp(- 2 \pi \alpha i n)}{2 \pi i} \\
+& = (\beta - \alpha) \exp(- \pi (\alpha + \beta) i n) \sinc((\beta - \alpha) n).
+\end{aligned}
+\end{displaymath}
+
 
 
 
