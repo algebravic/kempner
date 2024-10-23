@@ -38,7 +38,7 @@ class Fourier:
         avg = 0.5 * (end + start)
 
         return lambda _: (dif *
-                          self._exp(1j * self._pi * avg * _)
+                          self._exp(2j * self._pi * avg * _)
                           * self._sinc(dif * _))
     def interval_sinc(self, arg: int, eps: FLOAT) -> Callable[[FLOAT], COMPLEX]:
 
