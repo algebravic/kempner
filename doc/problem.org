@@ -4,6 +4,7 @@
 #+latex_header: \newtheorem{definition}{Definition}
 #+latex_header: \newtheorem{proposition}{Proposition}
 #+latex_header: \newcommand{\CC}{\mathbb{C}}
+#+latex_header: \DeclareMathOperator{\sinc}{sinc}
 #+Options: toc:nil
 
 * Introduction
@@ -272,15 +273,25 @@ we need to evaluate the following series:
 
 $$P_a(s) = \sum_{p \in D_a, \text{ prime}} \frac{1}{p^\alpha},$$
 
-where $D_a$ is the set of integers that start with $a$. We define the
-following function $g_a(x) = 1$ if $x \bmod 1 \in [\log_{10}(a) \mod
-1, \log_{10}(a+1) \bmod 1)$ (with the proviso that the right hand of
-the interval is 1 if $\log_{10}(a+1) \bmod 1 = 0$). Then we have
+where $D_a$ is the set of integers that start with $a$.
 
+For each positive integer $a$ define the function:
+\begin{displaymath}
+h_a(x) =
+\begin{cases}
+1 & \text{if } \log_{10} a \le x < \log_{10} (a+1) \\
+0 & \text{otherwise},
+\end{cases}
+\end{displaymath}
+and $g_a(x) = \sum_{n=-\infty}^\infty h_a(x - n)$,
+the periodization of $h_a$. We then have $n \in D_a$ if and only if
+$g_a(\log_{10} n) = 1$ and $n \ge 10^m$ where $m = \lfloor \log_{10} a\rfloor$.
+
+Thus we define
 $$P_a(s) = \sum_{p \ge 10^m, \text{ prime}} \frac{g_a(\log_{10} p)}{p^s},$$
-where $m = \lfloor \log_{10} a\rfloor$. Note that $g_a$ is periodic
-with period 1. Thus we may expand it in a Fourier series:
 
+Since, by construction, $g_a$ is periodic with period 1 we may expand
+it in a Fourier series
 $$g_a(x) = \sum_{n=-\infty}^\infty c_{a,n} \exp(2 \pi i n x).$$
 
 Plugging this is in and rearranging:
@@ -291,12 +302,11 @@ $$P_a(s) = \sum_{n=-\infty}^\infty c_{a,n}
 Since $g_a$ is real valued, we have $\overline{c_{a,n}} =
 c_{a,-n}$ for all $n$. Thus
 \begin{displaymath}
-\begin{aligned}
-$$P_a(s) &= c_{a,0} (P(s) - I_m(s))
+$$P_a(s) = c_{a,0} P^{(m)}(s)
 + \sum_{n=1}^\infty
- \Re \left(c_{a,n} P\left(s - \frac{2 \pi n}{\log 10} i\right)\right) \\ &  - I_m\left(s - \frac{2 \pi n}{\log 10}i\right).
-\end{aligned}
+ \Re \left(c_{a,n} P^{(m)}\left(s - \frac{2 \pi n}{\log 10} i\right)\right),
 \end{displaymath}
+where $P^{(m)}(s) := \sum_{p \ge 10^m, \text{ prime}} \frac{1}{p^s}$.
 
 If the coefficients $c_{a,n}$ decay rapidly this would give an
 efficient method to estimate the sum. However, for the function $g_a$,
@@ -326,7 +336,3 @@ We compute this directly:
 & = (\beta - \alpha) \exp(- \pi (\alpha + \beta) i n) \sinc((\beta - \alpha) n).
 \end{aligned}
 \end{displaymath}
-
-
-
-
