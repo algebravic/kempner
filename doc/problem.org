@@ -3,6 +3,7 @@
 #+latex_header: \usepackage{amsthm}
 #+latex_header: \newtheorem{definition}{Definition}
 #+latex_header: \newtheorem{proposition}{Proposition}
+#+latex_header: \newtheorem{corollary}{Corollary}
 #+latex_header: \newcommand{\CC}{\mathbb{C}}
 #+latex_header: \DeclareMathOperator{\sinc}{sinc}
 #+Options: toc:nil
@@ -158,6 +159,15 @@ However, we have $V(n) = V(a) 11^b + V(c)$, and $V(c) \le \sum_{i=0}^{b-1} 9 \cd
 Thus $V(a) 11^b \le V(n) < (V(a) + 9/10) 11^b$.
 Plugging in the bounds for $b$ we get the indicated result.
 \end{proof}
+\begin{corollary}
+Let $m\ge 0$ be an integer. For $a$ a positive integer set $\ell(a) := \frac{V(a)}{(a+1)^\alpha}$,
+$u(a) := \frac{V(a) + 9/10}{a^\alpha}$, where $\alpha = \log(11) / \log(10)$. Let $D_a$ denote the set of integers which start with $a$
+Then we have
+\begin{displaymath}
+\sum_{a=10^m}^{10^{m+1} - 1}\frac{1}{u(a)} \sum_{n \in D_a} \frac{1}{n^\alpha} \le \sum_{n=10^m}^\infty \frac{1}{V(n)} \le \sum_{a=10^m}^{10^{m+1} - 1} \frac{1}{\ell(a)}\sum_{n \in D_a} \frac{1}{n^\alpha}.
+\end{displaymath}
+The same inequalities are true when the value of $n$ are restricted to be primes.
+\end{corollary}
 
 We first make a simple use of this proposition.
 \begin{proposition}
@@ -288,7 +298,10 @@ the periodization of $h_a$. We then have $n \in D_a$ if and only if
 $g_a(\log_{10} n) = 1$ and $n \ge 10^m$ where $m = \lfloor \log_{10} a\rfloor$.
 
 Thus we define
-$$P_a(s) = \sum_{p \ge 10^m, \text{ prime}} \frac{g_a(\log_{10} p)}{p^s},$$
+$$P_a(s) = \sum_{p \ge 10^m, \text{ prime}} \frac{g_a(\log_{10}
+p)}{p^s},$$
+and
+$$P^{(m)}(s) := \sum_{p \ge 10^m, \text{ prime}}\frac{1}{p^s}.$$
 
 Since, by construction, $g_a$ is periodic with period 1 we may expand
 it in a Fourier series
@@ -303,10 +316,21 @@ Since $g_a$ is real valued, we have $\overline{c_{a,n}} =
 c_{a,-n}$ for all $n$. Thus
 \begin{displaymath}
 $$P_a(s) = c_{a,0} P^{(m)}(s)
-+ \sum_{n=1}^\infty
- \Re \left(c_{a,n} P^{(m)}\left(s - \frac{2 \pi n}{\log 10} i\right)\right),
++ 2 \sum_{n=1}^\infty
+ \Re \left(c_{a,n} P^{(m)}\left(s - \frac{2 \pi n}{\log 10} i\right)\right).
 \end{displaymath}
-where $P^{(m)}(s) := \sum_{p \ge 10^m, \text{ prime}} \frac{1}{p^s}$.
+
+Define $U_{m,n} = \sum_{10^m \le a < 10^{m+1}}
+\frac{c_{a,n}}{\ell(a)},$
+and $L_{m,n} = \sum_{10^m \le a < 10^{m+1}}
+\frac{c_{a,n}}{u(a)}.$
+
+Finally define
+\begin{displaymath}
+L_m &:=  L_{m,0} P^{(m)}(\alpha) + 2 \Re \sum_{n=1}^\infty L_{m,n} P^{(m)}(\alpha  - (2 i \pi n)/\log 10) \\
+U_m &:=  U_{m,0} P^{(m)}(\alpha) + 2 \Re \sum_{n=1}^\infty U_{m,n} P^{(m)}(\alpha  - (2 i \pi n)/\log 10).
+\end{displaymath}
+Then $L_m \le \sum_{n \ge 10^m} \frac{1}{V(n)} \le U_m$.
 
 If the coefficients $c_{a,n}$ decay rapidly this would give an
 efficient method to estimate the sum. However, for the function $g_a$,
@@ -332,7 +356,14 @@ coefficient of $g_{\alpha, \beta}$.
 We compute this directly:
 \begin{displaymath}
 \begin{aligned}
-& =\frac{\exp(-2 \pi \beta i x) - \exp(- 2 \pi \alpha i n)}{2 \pi i} \\
-& = (\beta - \alpha) \exp(- \pi (\alpha + \beta) i n) \sinc((\beta - \alpha) n).
+\widehat{g_{\alpha,\beta}}(n) & = \int_\alpha^\beta \exp(- 2 i \pi x n) dx = \\
+& =- \frac{\exp(-2 i \pi \beta n) - \exp(- 2 i \pi \alpha  n)}{2 i \pi n} \\
+&=  \exp(- i \pi (\alpha + \beta)  n) \frac{\exp( i \pi (\beta - \alpha)n) -\exp( - i \pi (\beta - \alpha)n) }{2 i \pi n} \\
+& =  \exp(- i \pi (\alpha + \beta)  n) \frac{\sin(\pi (\beta - \alpha)n)}{\pi n} \\
+& =  (\beta - \alpha) \exp(- i \pi (\alpha + \beta)  n) \sinc((\beta - \alpha)n),
 \end{aligned}
 \end{displaymath}
+where $\sinc(x) := \frac{\sin(\pi x)}{\pi x}$ when $x \ne 0$ and 1 otherwise.
+* Value for the original problem
+
+sum_n 1/V(n) = 26.2833282048814207...
