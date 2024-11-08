@@ -2,7 +2,7 @@
   Test of mollification by a bump function.
 """
 from typing import Callable, List
-from functools import partial
+from functools import partial, cache
 import numpy as np
 import mpmath as mp
 import scipy.integrate
@@ -12,17 +12,23 @@ COMPLEX = np.complex64 | mp.mpc
 
 FUN = Callable[[FLOAT], FLOAT]
 
-def fcoeff(fun: FUN, arg: int) -> COMPLEX:
+def bump_function(arg: np.float64) -> np.float64:
+
+    return np.exp(-1/(1 - arg ** 2)) if np.abs(arg) < 1 else 0.0
+
+@cache
+def normalization() -> np.float64:
+
+    return 1 / scipy.integrate.quad(bump_function, -1, 1)[0]
+
+# Note that bump_function is even, so all Fourier Coefficients
+# Are real.
+def moll_fourier_coeff(arg: np.float64) -> np.float64:
     "Use scipy.integrate.quad"
-
-    rcoeff = scipy.integrate.quad(fun,
-        -1, 1, weight='cos',
-        wvar = 2 * np.pi * arg)[0]
-    ccoeff = scipy.integrate.quad(fun,
-        -1, 1, weight='sin',
-        wvar = 2 * np.pi * arg)[0]
-    return rcoeff + 1j * ccoeff
-
+    mult = normalization()
+    return mult * scipy.integrate.quad(bump_function,
+                                       -1, 1, weight='cos',
+                                       wvar = - 2 * np.pi * arg)[0]
 class Bump:
 
     def __init__(self, use_numpy = True):
