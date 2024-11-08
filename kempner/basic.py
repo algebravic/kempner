@@ -1,32 +1,25 @@
 """
 """
 from typing import Tuple, List, Dict
-from functools import cache, reduce
-from itertools import product
-from math import log, floor
+from functools import reduce, partial
 import numpy as np
 from mpmath import mp
-from sympy import sieve
-from pyprimesieve import primes
 from .timeit import Timeit
+from .expand import expand, get_chunk
 
 FLOAT = mp.mpf | np.float64
 DUAL = Tuple[FLOAT, FLOAT]
 
-class Expander:
+class Basic:
     def __init__(self, from_base: int = 10, to_base = 11,
                  precision = 50,
-                 cutoff: int = 7,
-                 maxsieve: int = 10 ** 7,
+                 limit: int = 7,
                  use_numpy: bool = False):
         self._from_base = from_base
         self._to_base = to_base
-        self._cutoff = cutoff
-        self._limit = from_base ** cutoff
-        self._tmult = to_base ** cutoff
-        self._maxsieve = maxsieve
+        self._limit = limit
         if use_numpy:
-            mp.mps = 64
+            mp.prec = 53
             self._float = np.float64
             self._floor = np.floor
             self._exp = np.exp
@@ -39,41 +32,8 @@ class Expander:
             self._log = mp.log
         self._expon = self._log(self._to_base) / self._log(self._from_base)
         self._incr = self._float(self._from_base - 1) / (self._to_base - 1)
-        self._table = np.empty(self._limit, dtype = np.int64)
-        self.populate()
-
-    def populate(self):
-        """"
-          Precompute a table for base conversion
-          cutoff is the exponent of from_base to precompute.
-          It is assumed that that the results will all fit
-          into np.int64.
-        """
-
-        self._table[: self._from_base] = np.arange(self._from_base)
-        fence = self._from_base
-        ofence = self._to_base
-        # We've filled in out[: from_base ** ind]
-        for ind in range(self._cutoff - 1):
-            for indx in range(1, self._from_base):
-                bot = indx * fence
-                addend = indx * ofence
-
-                self._table[bot: bot + fence] = (self._table[: fence]
-                                             + addend)
-            fence *= self._from_base
-            ofence *= self._to_base
-    def expand(self, arg: int) -> int:
-        "Rewrite base from_base digits in base to_base."
-
-        res = 0
-        narg = arg
-        mult = 1
-        while narg >= self._limit:
-            res += mult * self._table[narg % self._limit]
-            narg //= self._limit
-            mult *= self._tmult
-        return res + mult * int(self._table[narg])
+        self.expand = partial(expand,
+            self._cutoff, self._from_base, self._to_base)
 
     def log_bound(self, arg: int) -> Tuple[FLOAT, FLOAT]:
 
@@ -120,6 +80,7 @@ class Expander:
                     map(self.log_bound, range(lbound, ubound)))
             
         return self._exp(- boundu), self._exp(- boundl)
+    
 
     def simple_bounds(self, digits: int,
                       strict: bool = True) -> Tuple[FLOAT, FLOAT]:
@@ -132,18 +93,19 @@ class Expander:
         initial = self._float(0.0)
         first = self._float(0.0)
         lbound = self._from_base ** digits
+        cutoff = self._from_base ** self._limit
+
+        gchunk = partial(get_chunk,
+            self._from_base, self._to_base, self._limit)
 
         # Do this in segments
-        for start in range(2, lbound + 1, self._maxsieve):
-            with Timeit(f"series chunks at {start}"):
-                
-                my_primes = primes(start,
-                    min(lbound, start + self._maxsieve) + 1)
+        for start in range(1, lbound + 1, cutoff):
+            end = min(lbound, start + cutoff)
+            with Timeit(f"series chunks at ({start}, {end})"):
 
-                initial += sum((self._float(_) ** (- self._expon)
-                    for _ in my_primes))
-                first += sum((1 / self._float(self.expand(_))
-                    for _ in my_primes))
+                prime_sum, xpn_sum = gchunk(start,end)
+                initial += prime_sum
+                first += xpn_sum
 
         print(f"initial = {initial}, first = {first}")
 
