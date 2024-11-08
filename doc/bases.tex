@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amsthm}
+\usepackage{hyperref}
 \newtheorem{lemma}[section]{Lemma}
 \newtheorem{theorem}[section]{Theorem}
 \newtheorem{corollary}[section]{Corollary}
@@ -31,7 +32,7 @@
   we construct a sequence of increasingly good approximations to its
   value obtained as certain linear combination of values of the
   \emph{prime zeta function}
-  $Z(s) := \sum_{p \text{ prime}} \frac{1}{p^s}$.
+  $P(s) := \sum_{p \text{ prime}} \frac{1}{p^s}$.
 \end{abstract}
 
 \section{The Problem}
@@ -75,7 +76,7 @@ representation does not use the ``digit'' 10.  Since
 \eqref{eq:sloane2} is a subseries of \eqref{eq:sloane1}, it too
 converges.
 
-In \cite{baillie2008summing} the author describes an efficient
+In \cite{baillie1979sums} the author describes an efficient
 algorithm to find good approximations to the sums of a Kempner series.
 
 One way to specify this is to require that
@@ -125,16 +126,17 @@ proceed as follows:
 \begin{theorem}
   \label{thm:main}
   Let $b$ be a positive integer. For each integer $10^b \le a <
-  10^{b+1}$ there are complex numbers $c_{a, j}$ such that
+  10^{b+1}$ there are complex numbers $f_{a, j}$ such that
   \begin{equation}
     \label{eq:decomp}
-    \sum_{p \text{ prime}} \frac{1}{V(p)} = \sum_{p < 10^b, \text{
-        prime}}\frac{1}{V(p)} + \sum_{10^b \le a < 10^{b+1}}
-    \sum_{j=1}^\infty \Re c_{a,j}Z_b\left(\frac{\log 11}{\log 10} + 2 \pi i a j\right),
+    \sum_{p \text{ prime}} \frac{1}{V(p)} = \sum_{p < 10^c, \text{
+        prime}}\frac{1}{V(p)} + \sum_{a \in S_c}
+    \sum_{j=1}^\infty \Re f_{a,j}P_c\left(\frac{\log 11}{\log 10}
+      - \frac{2 i \pi a j}{\log 10}\right),
   \end{equation}
-  where $Z_b(s) := \sum_{p \ge 10^b \text{ prime}} \frac{1}{p^s}$ is
+  where $P_c(s) := \sum_{p \ge 10^c \text{ prime}} \frac{1}{p^s}$ is
   the truncated \emph{prime zeta function}. Morevor the coefficients
-  $c_{a,j}$ decay super polynomially with $j$.
+  $f_{a,j}$ decay super polynomially with $j$.
 \end{theorem}
 \begin{lemma}
   \label{lem:recursion}
@@ -161,11 +163,17 @@ proceed as follows:
 \end{proof}
 \begin{definition}
   If $n \ge 0, a > 0$ we say that the base 10 expansion of $n$
-  \emph{starts with $a$} if, for some integer $b \ge 0$, we have
+  \emph{starts with $a$} if, for some integer $c \ge 0$, we have
   \begin{equation}
     \label{eq:bracket}
-    a 10^b \le n \le a 10^b + 10^b - 1.
+    a 10^c \le n \le a 10^c + 10^c - 1.
   \end{equation}
+  This is equivalent to
+  \begin{equation}
+    \label{eq:starts}
+    \log a \le \log n - c \log 10 < \log (a+1)
+  \end{equation}
+  for some integer $c$.
 \end{definition}
 \begin{notation}
   \label{not:starts}
@@ -175,24 +183,24 @@ proceed as follows:
 \end{notation}
 \begin{lemma}
   \label{lem:covering}
-  Every integer $n \ge 10^b$ starts with some element of the set
-  $S = \{a \in \ZZ: 10^b \le a < 10^{b+1}\}$.
+  Every integer $n \ge 10^c$ starts with some element of the set
+  $S_c := \{a \in \ZZ: 10^c \le a < 10^{c+1}\}$.
 \end{lemma}
 \begin{proof}
   Let $d = \lfloor \frac{\log n }{\log 10}\rfloor$,
-  then $d \ge b$ and $10^d \le n < 10^{d+1}$. Let
-  $a = \lfloor \frac{n}{10^{d-b}} \rfloor$. Then
-  $10^b \le a < 10^{b+1}$ and
-  $a 10^{d-b} \le n < (a+1) 10^{d-b}$. Thus $n$ starts with $a \in S$.
+  then $d \ge c$ and $10^d \le n < 10^{d+1}$. Let
+  $a = \lfloor \frac{n}{10^{d-c}} \rfloor$. Then
+  $10^c \le a < 10^{c+1}$ and
+  $a 10^{d-c} \le n < (a+1) 10^{d-c}$. Thus $n$ starts with $a \in S_c$.
 \end{proof}
 \begin{proposition}
   \label{prop:expansion}
-  Let $b \ge 0$ be an integer. Then
+  Let $c \ge 0$ be an integer. Then
   \begin{equation}
     \label{eq:decomposition}
     \sum_{p \text{ prime}} \frac{1}{V(p)} =
-    \sum_{p < 10^b \text{ prime}} \frac{1}{V(p)} +
-    \sum_{10^b \le a < 10^{b+1}} \sum_{p > 10^b \text{ prime}} \frac{\chi_a(p)}{V(p)}.
+    \sum_{p < 10^c \text{ prime}} \frac{1}{V(p)} +
+    \sum_{10^c \le a < 10^{c+1}} \sum_{p > 10^c \text{ prime}} \frac{\chi_a(p)}{V(p)}.
   \end{equation}
 \end{proposition}
 \begin{proposition}
@@ -202,33 +210,30 @@ proceed as follows:
   then
   \begin{equation}
     \label{eq:leading:digits}
-    \left( \frac{V(a)}{(a+1)^{\log 11/\log 10}}\right)
-      n^{\frac{\log 11}{\log 10}}
-      < V(n) < 
-      \left( \frac{V(a) + 9/10}{a^{\log 11/\log 10}}\right)
-      n^{\frac{\log 11}{\log 10}}.
+    \frac{V(a)}{(a+1)^{\frac{\log 11}{\log 10}}}
+      < \frac{V(n)}{n^{\frac{\log 11}{\log 10}}} < 
+      \frac{V(a) + 9/10}{a^{\frac{\log 11}{\log 10}}}
   \end{equation}
 \end{proposition}
 \begin{proof}
-  If there is a $b \ge 0 $ such that \eqref{eq:bracket} holds, there is an integer $0 \le c < 10^b$
-  such that $n = a 10^b + c$. Thus $V(n) = V(a) 11^b + V(c)$ by
-  \lemref{recursion}. However $0 \le V(c) \le \sum_{j=0}^{b-1} 9 \cdot
+  If there is a $c \ge 0 $ such that \eqref{eq:bracket} holds, there is an integer $0 \le d < 10^b$
+  such that $n = a 10^c + d$. Thus $V(n) = V(a) 11^c + V(d)$ by
+  \lemref{recursion}. However $0 \le V(d) \le \sum_{j=0}^{c-1} 9 \cdot
   11^j < (9/10) 11^b$.
   Thus
   \begin{equation}
     \label{eq:vbracket}
-    V(a) 11^b \le V(n) < (V(a) + 9/10)11^b.
+    V(a) 11^c \le V(n) < (V(a) + 9/10)11^c.
   \end{equation}
   The equation \eqref{eq:leading:digits} follows from the inequality
-  \eqref{eq:bracket} by taking logarithms:
+  \eqref{eq:starts} by rearranging:
   \begin{displaymath}
-    \frac{\log n}{\log 10} - \frac{\log(a+1)}{\log 10} < b
+    \frac{\log n}{\log 10} - \frac{\log(a+1)}{\log 10} < c
     \le \frac{\log n}{\log 10} - \frac{\log a}{\log 10},
   \end{displaymath}
-  and substituting into \eqref{eq:vbracket}.
-
+  and substituting these bounds for $c$ into \eqref{eq:vbracket}.
 \end{proof}
-If we take $b=0$ and set $\gamma = \min_{a=1}^9
+If we take $c=0$ and set $\gamma = \min_{a=1}^9
 \frac{V(a)}{(a+1)^{\frac{\log 11}{\log 10}}} > 0$, then $V(n) > \gamma n^{\log 11/\log 10}$.
 Thus the series $\sum_n \frac{1}{V(n)}$ is bounded
 term by term by the series $\sum_n \frac{1}{\gamma n^{\log 11/\log
@@ -236,7 +241,7 @@ term by term by the series $\sum_n \frac{1}{\gamma n^{\log 11/\log
 \begin{definition}
   The \emph{prime zeta function}
   \begin{displaymath}
-    Z(s) := \sum_{p \text{ prime}} \frac{1}{p^s},
+    P(s) := \sum_{p \text{ prime}} \frac{1}{p^s},
   \end{displaymath}
   where $s \in \CC, \Re s > 1$.
 \end{definition}
@@ -304,6 +309,11 @@ and has all derivatives at $1$ and $-1$ equal to 0, then convolving it
 with the indicator function of an interval will produce a ``nice''
 function 
 \nocite{johnson2015saddle}
-\bibliography{series}
+\nocite{baillie2024summing}
+\nocite{schmelzer2008summing}
+\nocite{burnol2024moments}
+\nocite{maynard2019primes}
+\nocite{baillie1979sums}
+\bibliography{series,digits}
 \bibliographystyle{plain}
 \end{document}
