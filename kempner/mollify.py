@@ -29,6 +29,7 @@ def moll_fourier_coeff(arg: np.float64) -> np.float64:
     return mult * scipy.integrate.quad(bump_function,
                                        -1, 1, weight='cos',
                                        wvar = - 2 * np.pi * arg)[0]
+
 class Bump:
 
     def __init__(self, use_numpy = True):
