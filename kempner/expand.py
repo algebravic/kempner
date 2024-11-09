@@ -5,6 +5,7 @@ import numpy as np
 import mpmath as mp
 from pyprimesieve import primes
 from .mollify import moll_fourier_coeff
+from .filters import get_filter
 
 FLOAT = np.float64 | mp.mpf
 
@@ -109,6 +110,8 @@ def digit_bounds(from_base: int, to_base: int, deg: int,
 def approximation(from_base: int, to_base: int, deg: int,
                   lim: int,
                   use_primes: bool = True,
+                  filter_name: str = '',
+                  filter_params = (),
                   use_mollifier: bool = False,
                   use_fejer: bool = False,
                   verbose: int = 0,
@@ -145,20 +148,26 @@ def approximation(from_base: int, to_base: int, deg: int,
     # First to the unmollified
     # The fourier coefficients of the characteristic functions
     # of the intervals.
-    bounds = digit_bounds(from_base, to_base, deg, table)
+    filtered = False
     if use_mollifier:
+        filtered = True
         smallest = - np.log(1 - from_base ** (-(deg + 1)))
         eps = scale * 0.5 * smallest
         if verbose > 0:
             print(f"smallest = {smallest}, eps = {eps}")
         mfour = np.vectorize(moll_fourier_coeff)
         # Get mollifier fourier coefficients
-        mcoeffs = mfour(eps * np.arange(lim))
+        filt_coeffs = mfour(np.arange(lim)/eps)
         if verbose > 1:
             print(f"log(mcoeffs) = {np.log(mcoeffs)}")
     else:
         eps = 0.0
+        if filter_name != '':
+            func = get_filter(filter_name, *filter_params)
+            filt_coeffs = func(np.linspace(0,1,lim))
+            filtered = True
 
+    bounds = digit_bounds(from_base, to_base, deg, table)
     logs = np.log(np.arange(lbound, ubound + 1)) / np.log(from_base)
 
     coeffs = np.empty((2, lim), dtype=np.complex64)
@@ -170,8 +179,8 @@ def approximation(from_base: int, to_base: int, deg: int,
     # np.sinc(x) = sin(pi * x) / (pi * x)
         main = np.sinc(np.outer(diffs, np.arange(lim)))
         fcoeffs = diffs.reshape(-1,1) * phase * main
-        if use_mollifier:
-            fcoeffs *= mcoeffs
+        if filtered:
+            fcoeffs *= filt_coeffs
         # multiply the correspoknding and sum up
         coeffs[ind] = (bounds[ind].reshape(-1,1) * fcoeffs).sum(axis=0)
     # Calculate the final summations
