@@ -25,7 +25,7 @@ class Fourier:
         of the periodization mod 1 of the characteristic function, I,  of the
         interval [start, end].
           
-          Note that F(I)(y) = int_{-\infty}^\infty I(x) e(-ixy)
+          Note that F(I)(y) = int_{-\infty}^\infty I(x) e(-xy)
           where e(x) = exp(2 pi i x).
           
           Note that np.sinc = sin(pi*x)/(pi * x)
