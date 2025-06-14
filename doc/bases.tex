@@ -18,7 +18,7 @@
 \newcommand{\RR}{\mathbb{R}}
 \newcommand{\ZZ}{\mathbb{Z}}
 \newcommand{\NN}{\mathbb{N}}
-\title{A Kempner like series with primes}
+\title{A Tale of two Series}
 \author{Victor S. Miller}
 \begin{document}
 \maketitle
@@ -30,13 +30,32 @@
   $\sum_{p \text{ prime}} \frac{1}{V(p)}$ also converges. The problem
   is to obtain a good approximation to its value. In order to do this
   we construct a sequence of increasingly good approximations to its
-  value obtained as certain linear combination of values of the
+  value obtained as certain linear combinations of values of the
   \emph{prime zeta function}
   $P(s) := \sum_{p \text{ prime}} \frac{1}{p^s}$.
 \end{abstract}
 
 \section{The Problem}
 \label{sec:problem}
+
+When confronted with an infinite series
+$$\sum_{i=1}^\infty a_n$$
+two questions arise: First, does the series converge? And second, if
+it does converge, find a good approximation to its value. If a series
+is proved to converge, then we have the following strategies for
+approximating its value:
+
+\begin{enumerate}
+\item \emph{Brute Force}: Choose a large $N$ and explictly sum (up to a
+  certain accuracy) $\sum_{i=1}^N a_n$.
+\item \emph{Smooth Approximation}: If there is smooth function $f(x)$
+  such that $f(n) = a_n$ for all sufficiently large $n$, then we can
+  use methods like
+  the \emph{Euler-MacLaurin} formula.
+\item \emph{Transformation}: By using the structure of the terms $a_n$
+  we create another series $\sum_n b_n$ where the $b_n$ are derived
+  from the $a_n$.
+\end{enumerate}
 
 It is well known that the \emph{harmonic series}
 \begin{displaymath}
@@ -53,9 +72,91 @@ considered series of the form
 \begin{displaymath}
   \sum_{n \in C} \frac{1}{n},
 \end{displaymath}
-where $C$ is a set of nonnegative integers whose base $b$
+where $C$ is a set of nonnegative integers whose base 10\footnote{His
+  argument is easily generalized to any integral base}
 representation does not use a particular ``digit'' $0 \le c <
-b$. Kempner pointed out that such series converge.
+10$. Kempner pointed out that this restricted sum converges.
+
+\begin{notation}
+  Let $A \subseteq \NN$ be a subset of the positive integers. For $x >
+  0$ denote by $A(x) = \#\{n \in A: n \le x\}$ denote the number of
+  elements of $A$ that are $\le x$.
+\end{notation}
+\begin{proposition}[Abel's Partial Summation formula]
+\label{prop:partial}
+  Let $a_i, b_i \in \RR$ for $i=1, \dots, N$, and $A_j = \sum_{j=1}^i a_i$.
+  \begin{displaymath}
+    \sum_{i=1}^N a_i b_i = \sum_{i=1}^{N-1} A_i (b_i - b_{i+1}) +
+    A_{N-1}b_N.
+  \end{displaymath}
+\end{proposition}
+\begin{corollary}
+  Let $A \subseteq \NN$. If $A(x) = O(x^\alpha)$ for $0 \le \alpha <
+  1$, then $\sum_{n \in A}\frac{1}{n}$ converges.
+\end{corollary}
+\begin{proof}
+  Apply \propref{partial} with $a_n = 1$ if $n \in A$ and 0 otherwise,
+  and $b_n = \frac{1}{n}$. We then have
+  \begin{displaymath}
+    \sum_{n \in A, n \le N}\frac{1}{n} = \sum_{n=1}^{N-1}
+    \frac{A(n)}{n(n+1)} + \frac{A(N)}{N}.
+  \end{displaymath}
+  By hypothesis, we have $\frac{A(n)}{n(n+1)} = O(n^{- (2 - \alpha)})$,
+  and $0 \le \sum_{n=1}^{N-1} n^{- (2 - \alpha)} \le \int_1^N
+  \frac{dx}{x^{2-\alpha}}$ which converges.
+\end{proof}
+
+Namely,
+for $i \ge 1$ let $C_i := \{n \in C: 10^{i-1} \le n < 10^i\}$. Since
+$C$ omits one digit, $C_i$ has at most $9^i$ elements. If we set
+$s(i) = \sum_{n \in C_i} \frac{1}{n}$. We have
+$\frac{9^i}{10^i} \le s(i) \le \frac{9^i}{10^{i-1}}$. Thus
+\begin{displaymath}
+  9 \le \sum_{n \in C} \frac{1}{n} = \sum_{i=1}^\infty s(i) \le 90.
+\end{displaymath}
+
+Baillie \cite{baillie1979sums} and Burnol \cite{burnol2024moments}
+have given efficient algorithms to accurately sum such series.
+Since Kempner's original paper, and a followup paper by Irwin 
+\cite{irwin1916curious} discussed other harmonic series with other
+restrictions on the base 10 digits in which there are bounds on the
+number of occurences of a specific digit.
+
+If $S$ is a set of positive integers, and $x$ is real, denote by $S(x)
+:= \#\{n \in S: n \le x\}$. We call a set $S$ \emph{thin} if
+$\lim_{x \rightarrow \infty} \frac{S(x)}{x} = 0$. We call a set $S$
+\emph{harmonically thin} if $\sum_{n \in S} \frac{1}{n}$ converges.
+It's fairly straightforward to see that if $S$ is harmonically thin,
+then it is thin, but the converse does hold.
+
+Denote by $S_h(x) = \sum_{n \in S, n \le x}\frac{1}{n}$, and $H_x =
+\sum_{1 \le n \le x} \frac{1}{n}$.
+
+We have the Stieltjes integral
+\begin{displaymath}
+  \sum_{n \in S, n \le y} \frac{1}{n} = \int_{\frac{1}{2}}^y \frac{1}{x} d S(x) =
+\left.\frac{S(x)}{x} \right|_{\frac{1}{2}}^y + \int_{\frac{1}{2}}^y \frac{S(x)}{x^2} dx.
+\end{displaymath}
+
+Also
+\begin{displaymath}
+  \frac{S(y)}{y} = \int_{\frac{1}{2}}^y x d S_h(x) = \left. \frac{x S_h(x)}{y}
+  \right|_{\frac{1}{2}}^y - \frac{1}{y} \int_{\frac{1}{2}}^y S_h(x) dx.
+\end{displaymath}
+
+However, the set $\mathcal{P}$ of primes is harmonically
+thick. Indeed, we have the theorem of Mertens:
+
+\begin{equation}
+\label{eq:mertens}
+\sum_{p \in \mathcal{P}, p \le x} \frac{1}{p} = \log \log x + c +
+O\left(\frac{1}{x}\right)
+\end{equation}
+for some constant $c > 0$\footnote{There is a quip ``$\log \log x$
+  approaches infinity, but has never been observed to do so.''}
+
+Once we now that a sum of a series converges, a natural question is:
+``What is its value?''.
 
 We'd like to understand those sets, $S$, of positive integers, such
 that
@@ -63,7 +164,7 @@ that
   \label{eq:thin}
   \sum_{n \in S} \frac{1}{n}
 \end{equation}
-converges. We will call such sets emph{harmonically thin}. All other
+converges. We will call such sets \emph{harmonically thin}. All other
 sets of integers we will call \emph{harmonically thick}. 
 
 Neil Sloane asked about evaluating the following two series
@@ -97,6 +198,76 @@ for all integers $n \ge 0, 0 \le a < 10$. Note that $V(a) = a$ for all
 $0 \le a < 10$ follows immediately. Note further that if $0 \le a <
 10^b$ for some $b > 0$ then $V(a) < 11^b$.
 
+\section{Numeration Systems and Finite Automata}
+\label{sec:numeration}
+
+In this section we discuss the methods of Baillie and Burnol of
+accelerating ellipsephic harmonic series, and generalize them.
+
+In \cite{kempner1914curious} Kempner considered the following series:
+\begin{equation}
+  \label{eq:kempner}
+  \sum_{n \in C}\frac{1}{n},
+\end{equation}
+where $C$ is the set of positive integers whose base 10 representation
+is missing a fixed, digits, $a$.
+He observed, that since the number
+of $i$-digit numbers that are missing a digit is $\le 9^i$, that the
+contribution to the sum \eqref{eq:kempner} of the terms with exactly
+$i$ digits is $\le \frac{9}{10}^i$. Since the geometric series
+$\sum_i \frac{9}{10}^i$ converges so does the series in question (by
+the comparison test). In particular the sum is then $\le 90$.
+
+Baillie, in \cite{baillie1979sums}, gave an efficient algorithm which
+will evaluate such sums with high accuracy, which we review and generalize.
+
+Let $b > 1$ be an integer, and $0 \le a < b$ be a ``digit''. Define
+the set $C_a$ to be the set of positive integers whose base $b$
+representation does not use the ``digit'' $a$.
+
+\begin{definition}
+  If $b > 1$ is an integer, a \emph{$b$-word} is a finite sequence
+  $w = (w_1, \dots, w_k)$ of integers $0 \le w_i < b$ and $w_k \ne 0$.
+
+  The \emph{value} $\nu(w) := \sum_{i=1}^k w_i b^{i-1}$. The \emph{length}
+  $\ell(w) := k$.
+  
+  A set of $b$-words is called a \emph{language}. If $L$ is a
+  language, we denote by $L_i$ the set of words in $L$ of length $i$.
+
+\end{definition}
+
+Note that the function $\nu: L \rightarrow \NN$ is injective, and if
+$\ell(w) < \ell(w')$ then $\nu(w) < \nu(w')$. If $x>0$ denote by $L(x)
+= \#\{w \in L : \nu(w) \le x\}$. For $i > 0$, an integer,  denote by
+$L^{(i)} = \{ w \in L : \ell(w) = i\}$, the set of words in $L$ of
+length $i$.
+
+Given such a language we are interested in the series
+\begin{displaymath}
+  \sum_{w \in L} \frac{1}{\nu(w)}.
+\end{displaymath}
+We observe that if $L(x) = O(x^\alpha)$ for $0 < \alpha < 1$, then
+this series converges. Since the function $L(x)$ has bounded variation
+the value of the the sum may expressed as a Stieltjes integral.
+\begin{equation}
+  \label{eq:stieltjes}
+  \sum_{w \in L, \mu(w) \le x} = \int_{\frac{1}{2}}^x\frac{d L(t)}{t}.
+\end{equation}
+Using integration by parts, this is
+\begin{equation}
+  \label{eq:parts}
+  \left. \frac{L(t)}{t} \right|_{\frac{1}{2}}^x + \int_{\frac{1}{2}}^x
+  \frac{L(t)}{t^2} dt.
+\end{equation}
+Kempner's original series used $b=10$ where the restriction was
+imposed that for all $w \in L$, we have $w_i \ne a$ for all $i=1,
+\dots, \ell(w)$.
+
+Kempner then observed that, for his language, we have $L(x) =
+O(x^{\frac{\log 9}{\log 10}})$. Namely, $|L^{(i)}| \le 9^i$, since
+there at most 9 choices for each digit. We then have $L(10^k) \le
+sum_{i=1}^k 9^i \le \frac{9}{8} 9^k$
 
 A particular case of a ``Kempner'' series is
 \begin{displaymath}
@@ -317,6 +488,51 @@ If we pick a function $\Phi$ as above which is $\mathcal{C}^\infty$
 and has all derivatives at $1$ and $-1$ equal to 0, then convolving it
 with the indicator function of an interval will produce a ``nice''
 function 
+\appendix
+
+\section{Some non-context free languages}
+\label{sec:nonCFL}
+
+Here we discuss the following language: Let $b > 1$ be an integer, and
+$0 < \lambda < 1$. The
+alphabet is the set $A = \{0,1,\dots, b-1\}$, and $c \in A$. The language $L$ will be all
+non-empty words which
+\begin{enumerate}
+\item Do not start with 0.
+\item If $\sigma \in L$, the number of occurences of $c$ of in
+  $\sigma$ is $\le \lambda \ell(\sigma)$, where $\ell(\sigma)$ denotes
+  the length of $\sigma$.
+\end{enumerate}
+\begin{proposition}
+  The language $L$ is not context-free.
+\end{proposition}
+\begin{proof}
+  If $L$ where context free, by the pumping lemma, there is a bound,
+  $B$ and words
+  $\alpha_i, \in A^*$, for $i=0, \dots, 5$, where
+  $\ell(\alpha_2 \alpha_3 \alpha_4) \le B$, and
+  $\ell(\alpha_2 \alpha_4) > 0$,
+  so that
+  $\alpha_1 \alpha_2^k \alpha_3 \alpha_4^k \alpha_5 \in L$ for every integer
+  $k \ge 1$.
+
+  Denote by $\mu(\sigma)$ the number of occurrences of $c$ in
+  $\sigma$. Since $\prod_{i=1}^5 \alpha_i \in L$,
+  we have
+  \begin{displaymath}
+    \mu(\alpha_1) + \mu(\alpha_3) + \mu(\alpha_5) + k (\mu(\alpha_2) +
+    \mu(\alpha_4))
+    \le \lambda (\ell(\alpha_1) + \ell(\alpha_3) + \ell(\alpha_5)
+    + k(\ell(\alpha_2) + \ell(\alpha_4)).
+  \end{displaymath}
+  Dividing both sides by $k$ and letting $k \rightarrow \infty$ we
+  then have
+  \begin{displaymath}
+    \mu(\alpha_2) + \mu(\alpha_4) \le \ell(\alpha_2) + \ell(\alpha_4).
+  \end{displaymath}
+  
+\end{proof}
+
 \nocite{johnson2015saddle}
 \nocite{baillie2024summing}
 \nocite{schmelzer2008summing}
