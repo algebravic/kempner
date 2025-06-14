@@ -17,15 +17,12 @@ is in `A375805`, but only 3 decimal places are known.
 
 > Second, $`V(\text{prime}_n)`$ is `A031216`.
 > What is $`S_2 = \sum 1/V(\text{prime}_n)`$?
-
 > Its value is in `A375863`, but only 1 decimal place is known.
-
 > Could someone calculate $`S_1`$ and $`S_2`$ more accurately?
-
 > As William Cheswick always says, "If brute force doesn't work, use
 > more brute force".
 
-Here we discuss both problems: the first problem is satsifactorially
+Here we discuss both problems: the first problem is satisfactorially
 solved by a method due to Baillie. We also discuss generalizations of
 his method. The second problem, involving a sum over primes, is much
 more delicate. It does not yield to the method of Baillie. Instead we
