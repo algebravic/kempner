@@ -4,7 +4,7 @@
 from typing import Callable
 from functools import partial
 import numpy as np
-from scipy.special import betainc, beta
+from scipy.special import betainc
 
 FLOAT = np.float64
 
