@@ -16,7 +16,7 @@
   b[n] = sum[x in D] x^n.
   a(j,n) = b[n]*c(j,n)/b^(j+n)
 
-  We expand (b*x_k)^(-j) by the binomial theorem:
+  We expand (b*x+k)^(-j) by the binomial theorem:
   (*) = (b*x+k)^(-j) = (b*x)^(-j) (1 + k/(b*x))^(-j)
     = (b*x)^(-j) * sum[n=0 to infinity] binom(-j,n) * (k/(b*x))^n
   But binom(-j,n) = c(j,n)
@@ -54,7 +54,23 @@
 
   sum[i=31 to infinity] s(i,1) ~ (b-1) * s(30,1)
   which comes from using the first terms of (**)
+  [This means that we expect s(i,1) = sum_{n=N}^infty a(1,n) s(0,n)
+  but s(0,n) = 8.9^(n-1) if d != 0 and 9^n if d=0
+  a(1,n) = b[n] * c(1,n)/10^(n+1)
+  c(1,n) = - binomial(n,n) = -1]
+  [I don't get his reasoning]
+  Maybe it's the fact that for n sufficiently large s(i,n) is approximately 1.
+  But this is only true if we're not omitting 1.
+  The first term would be a(j,0) s(i,j)
+  s(31,1) = sum_{n=0}^infty a(1,n) s(30,n+1)
 
+  sum_{i=N}^infty s(i,1) = sum_{i=N}^infty sum_{n=0}^infty a(1,n)  s(i,n+1)
+  what's the first term? maybe n=0. Which would yield a(1,0) s(N,n+1).
+  a(1,0) = b[0] c(1,0) / 10^1 = 9 * 1 /10
+  When N is large s(i,1) is the dominant term, all other s(i,n) are negligible
+  so it looks like s(N+j,1) is very close to a(j,0) s(N+j-1,1).
+  But I get a(1,0) = 9/10, not 9.
+  
   Another approach:
 
   We have (1-x)^(-j) = sum[n=0 to infinity] binomial(-j,n) (-x)^n
@@ -104,8 +120,8 @@ class Baillie:
     @cache
     def b_coeff(self, nval: int) -> int:
 
-        return sum((_ ** nval for _ in range(self._bval)
-                    if _ != self._dval))
+        return (sum((_ ** nval for _ in range(self._bval)
+                    if _ != self._dval)) if nval > 0 else self._bval - 1)
 
     @cache
     def a_coeff(self, jval: int, nval: int) -> mp.mpf:
@@ -142,6 +158,11 @@ class Baillie:
                     self.s_sums(ind - 1, jval + nval)
                         for nval in range(self._cutoff)))
 
+    def tail(self) -> mp.mpf:
+        
+        return ((self._bval - 1)
+                * self.s_sums(self._ubound - 1, 1))
+
     def set_bounds(self, ubound: int, bound: int, cutoff: int):
 
         self._ubound = ubound
@@ -154,4 +175,5 @@ class Baillie:
         if self._ubound is None:
             raise ValueError("Bounds must be set")
 
-        return sum((self.s_sums( _, 1) for _ in range(1, self._ubound)))
+        return (sum((self.s_sums( _, 1) for _ in range(1, self._ubound)))
+                + self.tail())
