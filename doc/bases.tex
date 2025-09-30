@@ -70,9 +70,9 @@ It is well known that the \emph{harmonic series}
 \end{displaymath}
 diverges. In fact, we have
 \begin{displaymath}
-  \sum_{n=1}^n \frac{1}{n} \sim \log N
+  \sum_{n=1}^N \frac{1}{n} \sim \log N
 \end{displaymath}
-as $n \rightarrow \infty$.
+as $N \rightarrow \infty$.
 
 In what follows, we'll be interested in subsets $C \subset \mathbb{N}$
 of the positive integers, and the associated series
@@ -82,14 +82,13 @@ of the positive integers, and the associated series
 \end{equation}
 We'll use the following notation
 \begin{notation}
-  For $0 \le x \in \mathbb{R}$ denos by $C(x) := \#\{n \in C: n \le x\}$.
+  For $0 \le x \in \mathbb{R}$ denotes by $C(x) := \#\{n \in C: n \le x\}$.
 \end{notation}
 
 Kempner in \cite{kempner1914curious}
 considered subsets, $C$ which consist of all positive integers whose
 base 10 representation
-\footnote{His
-  argument is easily generalized to any integral base}
+\footnote{His argument is easily generalized to any integral base.}
 omits one digits $d \in \{0,\dots,9\}$. He then
 pointed out that the series $H_C$ converges.
 
@@ -116,11 +115,13 @@ Thus, summing the above for $i\ge 1$, we obtain
 The lower bound in \eqref{eq:kempner} shows that the original series
 converges slowly:
 \begin{displaymath}
-  \sum_{n \in C, n \ge 10^{i-1}} \frac{1}{n} > 8 \frac{9}{10}^i.
+  \sum_{n \in C, n \ge 10^{i-1}} \frac{1}{n} > \sum_{j=i}^\infty
+  \frac{8}{10} \left(\frac{9}{10}\right)^{j-1} = 8 \left( \frac{9}{10}\right)^{i-1}
 \end{displaymath}
 To get $k$ digits of accuracy by brute force summation, we would need
-about 10^{\alpha i}$ terms where $\alpha = 1/(1-\log 9/\log {10})
-\approx 21.8543.
+to have $10^{-k} \ge 8 \left( \frac{9}{10}\right)^{i-1}$ or
+$10^i \ge 8^\alpha \cdot 10^{\alpha k}$ terms,
+where $\alpha = 1/(1-\log 9/\log {10}) \approx 21.8543$.
 
 There is a general statement about such series:
 \begin{theorem}
@@ -215,6 +216,9 @@ that
 converges. We will call such sets \emph{harmonically thin}. All other
 sets of integers we will call \emph{harmonically thick}. 
 
+\section{Sloane's Problem}
+\label{sec:sloane}
+
 Neil Sloane asked about evaluating the following two series
 \begin{equation}
   \label{eq:sloane1}
@@ -231,7 +235,7 @@ digits. It's easy to see that \eqref{eq:sloane1} is one of Kempner's
 series.  This follows since we may interpret the set
 $\{V(n) : n \in \NN\}$ as the set of integers whose base 11
 representation does not use the ``digit'' 10.  Since
-\eqref{eq:sloane2} is a subseries of \eqref{eq:sloane1}, it too
+\eqref{eq:sloane2} is a subseries of \eqref{eq:sloane1} it, too,
 converges.
 
 In \cite{baillie1979sums} the author describes an efficient
@@ -317,7 +321,7 @@ Given such a language we are interested in the series
 \end{displaymath}
 
 \begin{definition}
-  Let $A$ be a finite set. An $A$-automaton, \mathcal{A}, consists of a finite set
+  Let $A$ be a finite set. An $A$-automaton, $\mathcal{A}$, consists of a finite set
   $S$ of \emph{states}, a \emph{transition function} $\phi: S \times A
   \rightarrow A$, a \emph{start state} $s_0 \in S$, and a set of
   \emph{final states} $F \subseteq S$. By convention we enlarge the
