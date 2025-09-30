@@ -97,15 +97,17 @@ We reprise his argument, since parts of it are illustrative for our
 further analysis.
 
 For each positive integer, $i$, let $C[i]$ denote the elements of
-$C$ with exactly $i$ digits (i.e. contained in the interval $I_i :=
-[10^{i-1}, 10^i -1]$).
+$C$ with exactly $i$ digits (i.e. those integers contained in the
+interval
+$I_i := [10^{i-1}, 10^i -1]$).
 Since we're omitting one digit, we have $\# C[i] = 8\cdot 9^{i-1}$
 \footnote{If the omitted digit is 0, it is $9^i$}. If $n\in I_i$ we
-have $\frac{1}{10}^{i+1} < \frac{1}{n} \le \frac{1}{10}^i$.
+have $\frac{1}{10^i} < \frac{1}{n} \le \frac{1}{10^{i-1}}$.
 Thus we have
 \begin{equation}
 \label{eq:kempner}
-\frac{8}{10} \frac{9}{10}^{i-1} < \sum_{n \in C[i]} \frac{1}{n} \le 8\frac{9}{10}^{i-1}.
+\frac{8}{10}\left(\frac{9}{10}\right)^{i-1}
+< \sum_{n \in C[i]} \frac{1}{n} \le 8\left(\frac{9}{10}\right)^{i-1}
 \end{equation}
 Thus, summing the above for $i\ge 1$, we obtain
 \begin{displaymath}
