@@ -5,6 +5,7 @@ from typing import Callable
 from functools import partial
 import numpy as np
 from scipy.special import betainc
+import mpmath as mp
 
 FLOAT = np.float64
 
@@ -14,11 +15,13 @@ def fejer_filter(arg: np.ndarray) -> np.ndarray:
 
 def lanczos_filter(arg: np.ndarray) -> np.ndarray:
 
-    return np.sinc(arg)
+    mpsinc = np.vectorize(lambda _: mp.sinc(mp.pi * _))
+    return mpsinc(arg)
 
 def raised_cosine_filter(arg: np.ndarray) -> np.ndarray:
 
-    return 0.5 * (1 + np.cos(np.pi * arg))
+    mpcos = np.vectorize(lambda _: mp.cos(mp.pi * _))
+    return (1 + mpcos(arg)) / 2
 
 def sharpened_raised_cosine_filter(arg: np.ndarray) -> np.ndarray:
 
@@ -27,13 +30,14 @@ def sharpened_raised_cosine_filter(arg: np.ndarray) -> np.ndarray:
     return rcos ** 4 * (35 - 84 * rcos + 70 * rcos ** 2
                         - 20 * rcos ** 3)
 
-def exp_filter(alpha: np.float64, order: int, arg: np.ndarray) -> np.ndarray:
+def exp_filter(alpha: mp.mpf, order: int, arg: np.ndarray) -> np.ndarray:
 
-    return np.exp(alpha * arg ** p)
+    mpexp = np.vectorize(lambda _: mp.exp(alpha * _ ** order))
+    return mpexp(arg)
 
-def daubchies_filter(order: int, arg: np.ndarray) -> np.float64:
-
-    return 1 - betainc(order, order, arg)
+def daubchies_filter(order: int, arg: np.ndarray) -> np.ndarray:
+    mpbetainc = np.vectorize(lambda _: mp.betainc(order, order, x1 = 0, x2 = _, regularized=True))
+    return 1 - mpbetainc(arg)
 
 FILTERS = {'fejer': (fejer_filter, ()),
            'lanczos': (lanczos_filter, ()),
