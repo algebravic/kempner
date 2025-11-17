@@ -1,0 +1,90 @@
+#+Title: On Vaaler polynomials
+#+Latex_header: \usepackage{amsmath}
+#+Latex_header: \usepackage{amsfonts}
+#+Latex_header: \usepackage{amsthm}
+#+Latex_header: \newcommand{\RR}{\mathbb{R}}
+#+Latex_header: \DeclareMathOperator{\sgn}{sgn}
+#+bibliography: ~/BibFiles/zeta.bib
+#+bibliography: ~/BibFiles/series.bib
+#+bibliography: ~/BibFiles/digits.bib
+#+cite_export: biblatex backend=bibtex,style=alphabetic,url=true
+
+* The General Setup
+
+In [cite:@montgomery1994ten], Montgomery discusses Beurling-Selberg
+and Vaaler polynomials. The original idea of Beurling to find a
+majorant to the $\sgn$ function: $\sgn(x) = 1$ if $x > 0$, $-1$ if $x
+< 0$ and $\frac{1}{2}$ if $x=0$. That is we want to find a function
+$F: \RR \rightarrow \RR$ such that $F(x) \ge \sgn(x)$ for all $x \in
+\RR$, and its Fourier Transform $\widehat{F}$ is supported in
+$[-\delta, \delta]$ for some $\delta > 0$.
+
+We follow Montgomery's discussion. Recall that, for $K \ge 0$, an
+integer, *Fejer's kernel* is
+#+name: fejer
+#+begin_equation
+\begin{aligned}
+\Delta_K(x) & =
+\sum_{k=-K}^K \left(1 - \frac{|k|}{K}\right) e(kx) \\
+& = \frac{1}{K}\left(\frac{\sin \pi K x}{\sin \pi x}\right)^2,
+\end{aligned}
+#+end_equation
+where $e(x) := \exp(2 \pi i x)$.
+
+Then *Vaaler's Polynomial* is
+#+name: vaaler
+#+begin_equation
+\begin{aligned}
+V_K(x) & = \frac{1}{K+1}
+\sum_{k=1}^K \left(\frac{k}{K+1} - \frac 1 2\right) \Delta_{K+1}\left(x - \frac{k}{K+1}\right) \\
+& + \frac{1}{2\pi(K+1)} \sin {2 \pi (K+1) x} - \frac{1}{2\pi}
+\Delta_{K+1}(x) \sin{2 \pi x}.
+\end{aligned}
+#+end_equation
+We can substitute [[fejer]] in [[vaaler]] and get
+#+name: expanded
+#+begin_equation
+\begin{aligned}
+V_K(x) & = \frac{1}{K+1}
+\sum_{k=1}^K \left(\frac{k}{K+1} - \frac 1 2\right) \sum_{k' =
+-(K+1)}^{K+1} \left(1 - \frac{|k'|}{K+1}\right)e\left(k'\left(x -
+\frac{k}{K+1}\right)\right) \\
+\, + & \frac{1}{4 \pi i (K+1)} (e((K+1)x) - e(-(K+1) x)) \\
+\, - & \frac{1}{4 i \pi}\sum_{k=-(K+1)}^{K+1}\left(1 - \frac{|k|}{K+1}\right) e(kx)
+(e(x) - e(-x)) 
+\end{aligned}
+#+end_equation
+
+On page 5, Montgomery says
+
+By an elementary calculation it may be shown that
+
+#+name: vaaler:fourier
+#+begin_equation
+\begin{aligned}
+V_K(x) & = \frac{1}{K+1} \sum_{k=1}^K f(k/(K+1)) \sin 2 \pi k x,
+\end{aligned}
+#+end_equation
+where $f(u) = -(1-u) \cot \pi u - / \pi$.
+
+Clearly there's a misprint at the end of this since it doesn't parse.
+
+The *Beurling polynomial* is
+#+name: beurling
+#+begin_equation
+\begin{aligned}
+B_K(x) & = V_K(x) + \frac{1}{2(K+1)} \Delta_{K+1}(x).
+\end{aligned}
+#+end_equation
+
+If $\alpha \le \beta \le \alpha + 1$ and
+$\chi_{\alpha,\beta}(x) = \beta - \alpha + s(x-\beta) + s(\alpha -
+x)$,
+where
+$s(x) = \begin{cases} \{x\} - \frac 1 2 &\text{x \not \in \ZZ} \\
+0 & \text{x \in \ZZ}$, where $\{x\} := x - \lfloor x \rfloor$, the
+fractional part of $x$. Note that $\chi_{\alpha,\beta} = 1$ if
+$\{\alpha\} \le \{x\} \le \beta - \lfloor \alpha \rfloor$ and 0
+otherwise.
+
+#+print_bibliography:
