@@ -1,3 +1,9 @@
 /ltximg/
 /poetry.lock
 *.odt
+/doc/*.tex
+/doc/*.bbl
+/doc/ltximg/
+/doc/*.pdf
+/doc/*ERROR
+/doc/*.blg
