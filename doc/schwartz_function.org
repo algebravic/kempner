@@ -2,7 +2,9 @@
 
 * From  math.stackexchange.com
 [[https://math.stackexchange.com/questions/101480/are-there-other-kinds-of-bump-functions-than-e-frac1x2-1][Are there other kinds of bump functions than $e^{\frac{1}{x^2-1}}$]]
-by KellyKelly
+
+[[https://math.stackexchange.com/questions/235466/smooth-approximations-of-indicator-function][smooth approximations of indicator function]]
+by Kelly
 
 How would I construct Schwartz functions
 $f_1^\varepsilon, f_2^\varepsilon$ on $\mathbb{R}$ such that $f_1^\varepsilon(x) \le
