@@ -1,0 +1,36 @@
+September 1, 2024 11:21am
+
+Dear Math Fun and Seq Fans,
+
+Let V(n) mean: write n in base 10 but read it as if it were base 11.
+
+E.g. V(27) = 2*11 + 7 = 29. V(n) is A171397.
+
+V is interesting because although the harmonic series Sum 1/n diverges, it
+is a classic result that S1 = Sum 1/V(n) converges.
+
+The decimal expansion of S1 is in A375805, but only 3 decimal places are
+known.
+
+
+Second, V(prime_n) is A031216. What is S2 = Sum 1/V(prime_n)?
+
+Its value is in A375863, but only 1 decimal place is known.
+
+
+Could someone calculate S1 and S2 more accurately?
+
+As William Cheswick always says, "If brute force doesn't work, use more
+brute force".
+
+
+Best regards
+Neil
+
+Neil J. A. Sloane, Chairman, OEIS Foundation.
+Also Visiting Scientist, Math. Dept., Rutgers University,
+Email: njasloane@gmail.com
+_______________________________________________
+math-fun mailing list -- math-fun@mailman.xmission.com
+To unsubscribe send an email to math-fun-leave@mailman.xmission.com
+
