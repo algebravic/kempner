@@ -7,3 +7,5 @@
 /doc/*.pdf
 /doc/*ERROR
 /doc/*.blg
+/doc/*blx.bib
+/doc/test.org
