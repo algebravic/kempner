@@ -141,6 +141,11 @@ class Baillie:
                             for _ in range(self._bval)
                             if _ != self._dval)
 
+    def tail(self, jval: int = 1) -> mp.mpf:
+        
+        return ((self._bval - 1)
+                * self.s_sums(self._ubound - 1, jval))
+
     @cache
     def s_sums(self, ind: int, jval: int) -> mp.mpf:
         # for values <= bound use exhaustion
@@ -151,17 +156,11 @@ class Baillie:
         # the asymptotic expression
         elif ind >= self._ubound:
             # return tail estimate
-            return ((self._bval - 1)
-                    * self.s_sums(self._ubound - 1, jval))
+            return self.tail(jval)
         else:
             return sum((self.a_coeff(jval, nval) * 
                     self.s_sums(ind - 1, jval + nval)
                         for nval in range(self._cutoff)))
-
-    def tail(self) -> mp.mpf:
-        
-        return ((self._bval - 1)
-                * self.s_sums(self._ubound - 1, 1))
 
     def set_bounds(self, ubound: int, bound: int, cutoff: int):
 
@@ -170,10 +169,10 @@ class Baillie:
         self._cutoff = cutoff
         self.s_sums.cache_clear() # old values are no good
 
-    def ksums(self) -> mp.mpf:
+    def ksums(self, expon: int = 1) -> mp.mpf:
 
         if self._ubound is None:
             raise ValueError("Bounds must be set")
 
-        return (sum((self.s_sums( _, 1) for _ in range(1, self._ubound)))
-                + self.tail())
+        return (sum((self.s_sums( _, expon) for _ in range(1, self._ubound)))
+                + self.tail(expon))
