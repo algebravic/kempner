@@ -5,6 +5,8 @@
 #+latex_header: \usepackage{amsfonts}
 #+latex_header: \usepackage[T1]{fontenc}
 #+latex_header: \DeclareMathOperator{\sinc}{sinc}
+#+latex_header: \DeclareMathOperator{\Li}{Li}
+#+latex_header: \DeclareMathOperator{\Ei}{Ei}
 #+latex_header: \newtheorem{lemma}{Lemma}
 #+latex_header: \newtheorem{definition}{Definition}
 #+bibliography: ~/BibFiles/zeta.bib
@@ -44,11 +46,52 @@ simple examples of this.
 However, to deal with the second series is very challenging. It turns
 out that the set of digits of primes in a fixed base can't even be
 closely approximated by finite automata
-[cite:@dubbe2024automaticity]
+[cite:@dubbe2025automaticity]
 (in a certain technical sense
 that I don't have the space to go into). Some people tried to approach
 both problems by summing up the initial part of the series, but
 convergence is excrutiatingly slow.
+* Some simple observations
+In order to show the series $\frac{1}{V(n)}$ converges, we first
+calculate some useful bounds on $V(n)$. If $n \ge 1$, let
+$k=\left\lfloor \frac{\log n}{\log 10} \right \rfloor$.
+We then have
+$10^k \le n < 10^{k+1}$. Thus, if $\alpha = \frac{\log 11}{\log 10}$,
+we have
+$11^k \le n^\alpha < 11^{k+1}$.
+But
+\[11^k \le V(n) \le \sum_{i=0}^k 9 \cdot 11^i < \frac{9}{10} 11^{k+1}\].
+Thus \[\frac{n^\alpha}{11} < V(n) < \frac{99}{10} n^\alpha\].
+or 
+\begin{displaymath}
+\frac{11}{n^\alpha} > \frac{1}{V(n)} \ge \frac{10}{99 n^\alpha}.
+\end{displaymath}
+
+In order to get a handle on how hard "brute force" is we need a good
+lower bound for the tail of the series
+\begin{displaymath}
+T(m) := \sum_{n=10^m}^\infty \frac{1}{V(n)}.
+\end{displaymath}
+For $m > 0$ an integer, define $I(m) := \int_{10^m}^\infty
+\frac{dx}{x^\alpha}$, and $H(m) := \sum_{n=1}^{10^m-1}
+\frac{1}{V(n)}$. Then, since $\frac{1}{n^\alpha}$ is decreasing, we
+have $T(m) \ge \frac{10}{99}I(m)$.
+By the above, we have
+\begin{displaymath}
+\frac{10}{99} I(m) \le \sum_{n=10^m}^\infty \frac{1}{V(n)} 
+< 11 (T(m) + \int_{10^m-1}^{10^m} \frac{dx}{x^\alpha}).
+\end{displaymath}
+Note that $I(m) = \frac{1}{\alpha - 1} \frac{1}{10^{m(\alpha - 1)}} =
+\frac{1}{\alpha - 1} (10/11)^m$.
+
+In order to ensure that we have an accuracy of $< 10^{-r}$, it is
+necessary that $\frac{10}{99}\frac{1}{1-\alpha} (10/11)^m <
+\frac{1}{2}10^{-r}$,
+or
+$\log(c) + m \log(10/11) < -r \log(10)$,
+where $c = \frac{20}{99(\alpha - 1)}$,
+or
+$m > \frac{r}{\alpha - 1} - \frac{\log(c)}{\log(11/10)}$.
 * The series of primes
 To attack the second series, involving primes, I had the idea that if
 one fixes a set of leading digits of $n$ that $\frac{1}{V(n)}$ doesn't
@@ -60,11 +103,10 @@ Then we have
 #+begin_lemma
 If $n$ has leading digits $a$, then we have
 #+name: lower:upper
-#+begin_equation
-\ell(a) := \frac{V(a)}{(a+1)^\alpha}
-< \frac{V(n)}{n^\alpha} < 
+\begin{equation}
+\ell(a) := \frac{V(a)}{(a+1)^\alpha} < \frac{V(n)}{n^\alpha} < 
 \frac{V(a) + 9/10}{a^\alpha} := u(a),
-#+end_equation
+\end{equation}
 where $\alpha = \log 11/\log 10$.
 #+end_lemma
 #+begin_proof
@@ -103,8 +145,9 @@ As $a$ gets bigger, the
 ratio $u(a)/\ell(a)$ gets closer to 1.
 
 We can try to evaluate the upper and lower bounds by using the *prime
-zeta function* $P(s) = \sum_{p, \text{ prime}} \frac{1}{p^s}$. It is
-also convenient to define the *truncated prime zeta function*
+zeta function* $P(s) = \sum_{p, \text{ prime}} \frac{1}{p^s}$. We
+discuss it in more detail in [[*Calculating \(P(s)\)][Calculating \(P(s)\)]].
+It is also convenient to define the *truncated prime zeta function*
 $P_a(s) = \sum_{p \ge a, \text{ prime}} \frac{1}{p^s}$.
 
 The idea is that $n$ has leading digits $a$ if and only if
@@ -126,7 +169,7 @@ the *Benford's Law*
 [cite:@benford1938law][cite:@newcomb1881note][cite:@cohen1984prime]
 which says that the "probability" (scare quotes are
 necessary here) that $n$ has leading digits $a$ is $\log(1 + 1/a)/ \log
-10$ (which is the Fourier coefficient of $H_a$).
+10$ (which is the constant Fourier coefficient of $H_a$).
 
 If $S$ is a finite set of positive integer, define $c(S)$ to be the
 set of integers, $n$, so that some element of $S$ is the leading
@@ -191,23 +234,46 @@ Then $I_{\beta,\gamma}$ is periodic with period 1 and has Fourier coefficients
 \end{aligned}
 \end{displaymath}
 where the normalized $\sinc(x) := \frac{\sin(\pi x)}{\pi x}$ when $x \ne 0$ and 1 otherwise.
-** Calculating $P(s)$
-The *prime zeta function* was first considered by numerically by Fröberg
-[cite:@froberg1968prime]. An efficient formula for calculating it was
-given by Glaisher [cite:@glaisher1891sums] [fn:titchmarsh: see also
-[cite:@titchmarsh1951theory section 11.9]]
+** Calculating \(P(s)\)
+The *prime zeta function* was first defined by Glaisher
+[cite:@glaisher1891sums] [fn:titchmarsh: see also
+[cite:@titchmarsh1951theory section 11.9]], and considered,
+numerically, by Fröberg [cite:@froberg1968prime].  Glaisher gave an
+efficient formula for calculating it for real $s > 1$:
 \begin{displaymath}
 P(s) = \sum_{k=1}^\infty \frac{\mu(k)}{k} \log \zeta(ks),
 \end{displaymath}
 where $\mu$ is the Möbius function, and $\zeta$ is the Riemann zeta
-function. However, care must be taken into account when $s$ is not
-real. If one uses the principal value of the logarithm the above
-formula is still valid when $\Re s > \sigma_- \approx 1.033908072$
-[cite:@vandelune1983some].
+function. We would also like to use the same formula for complex $s$
+with $\Re s > 1$ where we use the principal value of of the
+logarithm. Fortunately, as we see below, this is still valid in a
+large region of $s$.
+
+This is derived as follows:
+ If $\Re s > 1$ it is easy to see that this converges absolutely. If
+\begin{displaymath}
+\zeta(s) := \sum_{n-1}^\infty \frac{1}{n^s}
+= \prod_{p \text{ prime}} (1-p^{-s}).
+\end{displaymath}
+is the Riemann zeta function, where the *Euler product* in the second
+equality follows by the fundamental theorem of arithmetic.
+
+If $s > 1$ is real, we can take logarithms:
+\begin{displaymath}
+\log \zeta (s) = - \sum_{p \text{ prime}} \sum_{n=1}^\infty \frac{1}{np^{ns}} = \sum_{n=1}^\infty \frac{P(ns)}{n}.
+\end{displaymath}
+Using Möbius inversion, we get
+\[ P(s) = \sum_{n=1}^\infty \mu(n) \frac{\log \zeta(ns)}{n}, \]
+where $\mu(n)$ is the Möbius function. Note that this is only valid
+for $s$ real, but we would like to use it for complex $s$ where we use
+the principal value of the logarithm of $\zeta(s)$. Fortunately, there
+is a theorem of van de Lune [cite:@vandelune1983some] which implies
+that this is valid as long as $\Re s > \sigma_- \approx 1.033908072$.
+
 ** Bump Functions
 Define the function $\Phi(x) := c \exp\left(\frac{-1}{1-x^2}\right)$
 when $x \in (-1,1)$ and 0 otherwise, where $c$ is chosen so that
-$\int_{-infty}^\infty \Phi(x) dx = 1$. We have $\Phi \in C^\infty$. If
+$\int_{-\infty}^\infty \Phi(x) dx = 1$. We have $\Phi \in C^\infty$. If
 $t > 0$, define $\Phi_t(x) := t \Phi(tx)$. Johnson
 [cite:@johnson2015saddle] analyzes the Fourier transform of $\Phi$.
 ** Some Lemmas
@@ -224,4 +290,19 @@ h(x)$ for all $x \in I$, and $f(x)$ non-increasing on $I$. Then
 \end{aligned}
 \end{displaymath}
 #+end_lemma
+#+begin_lemma
+Let $\Ei(x) := \int_{-\infty}^x \frac{e^t dt}{t}$ be the exponential integral.
+Let $a > 1$, $b > 1$, $c = 1/(1-b) < 0$. Then
+\begin{displaymath}
+\int_a^{\infty} \frac{dx}{x^b \log x}
+\end{displaymath}
+converges and $= \Li(a^{1-b})$.
+#+end_lemma
+#+begin_proof
+Let $c=1/(1-b) < 0$. Then make the substitution $x=e^{cy}$ in the
+integral above. This yields
+\begin{displaymath}
+\, \int_{\log(a)/c}^{-\infty} \frac{e^{(c-bc)y}dy}{y} = - \Ei(\log(a)/c).
+\end{displaymath}
+#+end_proof
 #+print_bibliography:
