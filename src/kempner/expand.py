@@ -6,38 +6,9 @@ import mpmath as mp
 from sympy import primerange
 from .mollify import moll_fourier_coeff
 from .filters import get_filter
+from .util import expand_table, digit_bounds
 
 FLOAT = np.float64 | mp.mpf
-
-def expand_table(limit: int,
-                 from_base: int, to_base: int) -> np.ndarray:
-    """
-      Calculate the expanded table.
-      V(n) = the integer obtained by using the digits of n
-       in the base, from_base, as digits in to_base
-      Tabulate all values of V(n) for 0 <=n < from_base ** limit
-
-      Since integers in numpy are limited to 64 bits, this
-      is only valid when to_base ** limit < 2 ** 64.
-      Input:
-       limit: int - the number of digits in the from_base
-       from_base: int - the base of integers of the inputs
-       to_base: int - the base of integers of the outputs
-    """
-    top = from_base ** limit
-    table = np.empty(top, dtype=np.int64)
-    table[: from_base] = np.arange(from_base, dtype=np.int64)
-    fence = from_base
-    ofence = to_base
-    # We've filled in out[: from_base ** ind]
-    for ind in range(limit - 1):
-        for indx in range(1, from_base):
-            bot = indx * fence
-            addend = indx * ofence
-            table[bot: bot + fence] = table[: fence] + addend
-        fence *= from_base
-        ofence *= to_base
-    return table
 
 def truncated_zeta_values(lbound: int, nterms: int,
                           expon: FLOAT,
@@ -89,20 +60,6 @@ def initial_truncated(from_base: int, to_base: int, deg: int, nterms: int,
         dzeta = truncated_zeta_values(bbound, nterms,
             expon, iexpon)
     return initial, dzeta
-    
-
-def digit_bounds(from_base: int, to_base: int, deg: int) -> np.ndarray:
-
-    mpf = np.vectorize(lambda _: mp.mpf(int(_)))
-    lbound = from_base ** deg
-    ubound = lbound * from_base
-    expon = mp.log(to_base)/mp.log(from_base)
-    table = expand_table(deg + 1, from_base, to_base)
-    leading = np.arange(lbound, ubound)
-    twiddle = mp.mpf(from_base - 1) / (to_base - 1)
-    lower =  leading ** expon / (mpf(table[leading]) + twiddle)
-    upper =  (leading + 1) ** expon / mpf(table[leading])
-    return np.vstack([lower, upper])
 
 def get_filter_coeffs(filter_name: str, filter_params: Tuple,
                       scale: FLOAT,
@@ -131,54 +88,13 @@ def get_filter_coeffs(filter_name: str, filter_params: Tuple,
 def mem_usage(msg: str):
     print(f"{msg}: memory = {resource.getrusage(resource.RUSAGE_SELF).ru_maxrss:_}")
 
-def approximation(from_base: int, to_base: int,
-                  deg: int, # number of leading digits
-                  nterms: int, # number of terms in the fourier series
-                  extra: int = 0, # extra number of places for the tail estimate
-                  use_primes: bool = True, # Calculate the prime series
-                  filter_name: str = '', # Fourier filter to use
-                  filter_params = (), # Parameters for the filter
-                  verbose: int = 0, # verbosity level
-                  scale: mp.mpf = mp.mpf(1) / 100):
-
-    r"""
-    Approximate the tail with deg digits in from_base.
-    Inputs:
-       Required:
-        from_base: base of input integers.
-        to_base: base of output integers.
-        deg: digit size of leading digits
-        nterms: the number of Fourier coefficients to use
-       Optional:
-        use_primes: bool -- calculated the prime series, default: True
-        filter_name: str - name of filter to use, default: ''
-        filter_params: Tuple - parameters of the filters, default: ()
-        verbose: int - level of verbosity, default = 0
-        scale: mp.mpf scale multiplier, default 0.01
-    """
-    # Find smallest interval size
-    # log(b^(deg+1)) - log(b^(deg + 1) - 1) =
-    # - log(1 - b^(-(deg+1)))
-
-    # Get the V(n) table
-    initial, dzeta = initial_truncated(from_base, to_base, deg, nterms,
-        extra = extra, use_primes = use_primes)
-
-    if verbose > 0:
-        print(f"{'Primes' if use_primes else 'All integers'}: initial={initial}.")
-
-    if verbose > 0:
-        mem_usage("After initial")
-
-    # Find upper and lower found coefficients
-    # Calculate filter/mollification coefficients
-    # First to the unmollified
-    # The fourier coefficients of the characteristic functions
-    # of the intervals.
-    # Calculate any filters/mollifiers to use
-    # Get the upper lower bounds from the selected leading digits
-    # We may need to modify this if we use variable digit lengths
-
+def get_coeffs(from_base: int, to_base: int,
+               deg: int, # number of leading digits
+               nterms: int, # number of terms in the fourier series
+               filter_name: str = '', # Fourier filter to use
+               filter_params = (), # Parameters for the filter
+               verbose: int = 0, # verbosity level
+               scale: mp.mpf = mp.mpf(1) / 100):
     eps, filt_coeffs = get_filter_coeffs(filter_name, filter_params,
         scale,
         mp.mpf(from_base) ** (- (deg + 1)), nterms)
@@ -220,13 +136,68 @@ def approximation(from_base: int, to_base: int,
             fourier_coeffs *= filt_coeffs
         # multiply the corresponding and sum up
         coeffs[ind] = (bounds[ind].reshape(-1,1) * fourier_coeffs).sum(axis=0)
+    return coeffs
+
+def approximation(from_base: int, to_base: int,
+                  deg: int, # number of leading digits
+                  nterms: int, # number of terms in the fourier series
+                  extra: int = 0, # extra number of places for the tail estimate
+                  use_primes: bool = True, # Calculate the prime series
+                  filter_name: str = '', # Fourier filter to use
+                  filter_params = (), # Parameters for the filter
+                  verbose: int = 0, # verbosity level
+                  scale: mp.mpf = mp.mpf(1) / 100):
+
+    r"""
+    Approximate the tail with deg digits in from_base.
+    Inputs:
+       Required:
+        from_base: base of input integers.
+        to_base: base of output integers.
+        deg: digit size of leading digits
+        nterms: the number of Fourier coefficients to use
+       Optional:
+        use_primes: bool -- calculated the prime series, default: True
+        filter_name: str - name of filter to use, default: ''
+        filter_params: Tuple - parameters of the filters, default: ()
+        verbose: int - level of verbosity, default = 0
+        scale: mp.mpf scale multiplier, default 0.01
+    """
+    # Find smallest interval size
+    # log(b^(deg+1)) - log(b^(deg + 1) - 1) =
+    # - log(1 - b^(-(deg+1)))
+
+    # Find upper and lower found coefficients
+    # Calculate filter/mollification coefficients
+    # First to the unmollified
+    # The fourier coefficients of the characteristic functions
+    # of the intervals.
+    # Calculate any filters/mollifiers to use
+    # Get the upper lower bounds from the selected leading digits
+    # We may need to modify this if we use variable digit lengths
+
+    # Get the V(n) table
+    initial, dzeta = initial_truncated(from_base, to_base, deg, nterms,
+        extra = extra, use_primes = use_primes)
+
+    if verbose > 0:
+        print(f"{'Primes' if use_primes else 'All integers'}: initial={initial}.")
+
+    if verbose > 0:
+        mem_usage("After initial")
     # Calculate the final summations
+    coeffs = get_coeffs(from_base, to_base, deg, nterms,
+                        filter_name = filter_name,
+                        filter_params = filter_params,
+                        verbose = verbose,
+                        scale = scale)
+        
     lprod = np.array([_.real for _ in (coeffs[0] * dzeta)])
     lprod[1:] *= 2
     uprod = np.array([_.real for _ in (coeffs[1] * dzeta)])
     uprod[1:] *= 2
     # initial coefficient is real
     # The others are complex, multiply by 2 for positive/negative
-    ltail = lprod.sum()
-    utail = uprod.sum()
+    ltail = mp.fsum(lprod.tolist())
+    utail = mp.fsum(uprod.tolist())
     return (initial + ltail, initial + utail)
