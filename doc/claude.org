@@ -1,0 +1,88 @@
+** Setting Up the Fourier Series
+:PROPERTIES:
+:CUSTOM_ID: setting-up-the-fourier-series
+:END:
+*Notation.* Let \(s_k = \alpha + 2\pi i k\) where
+\(\alpha = \log_{10} 11 \approx 1.0414 > 1\). The proposed coefficients
+are \[a_k = \frac{\zeta(s_k)}{s_k}.\]
+
+Since \(\operatorname{Re}(s_k) = \alpha > 1\), the Dirichlet series for
+\(\zeta\) converges absolutely on this vertical line, and \(a_k\) is
+well-defined for all \(k \in \mathbb{Z}\).
+
+--------------
+
+** Identifying the Underlying Function
+:PROPERTIES:
+:CUSTOM_ID: identifying-the-underlying-function
+:END:
+A classical integral representation gives, for
+\(\operatorname{Re}(s)>1\):
+\[\frac{\zeta(s)}{s} = \int_1^\infty \lfloor t \rfloor\, t^{-s-1}\,dt.\]
+
+Substituting \(t = e^u\) (so \(dt = e^u\,du\)):
+\[a_k = \int_0^\infty \underbrace{\lfloor e^u\rfloor e^{-\alpha u}}_{g(u)}\, e^{-2\pi i k u}\, du = \hat{g}(k),\]
+
+i.e. \(a_k\) is the *Fourier transform of*
+\(g(u) = \lfloor e^u\rfloor e^{-\alpha u}\) *evaluated at the integers*.
+By the standard periodisation identity, the Fourier series has
+coefficients equal to those of the period-1 function
+\[\boxed{h(x) = \sum_{n=0}^\infty \lfloor e^{x+n}\rfloor\, e^{-\alpha(x+n)}, \quad x\in[0,1),}\]
+extended periodically. (The sum converges since each term
+\(\sim e^{(1-\alpha)n}\to 0\).)
+
+--------------
+
+** Bounded Variation --- the Key Structural Fact
+:PROPERTIES:
+:CUSTOM_ID: bounded-variation-the-key-structural-fact
+:END:
+The function \(h\) is *piecewise smooth between jumps*. The jumps arise
+exactly when \(e^{x+n}\) crosses an integer \(m\), i.e. at the points
+\[x_m = \{\ln m\} = \ln m - \lfloor\ln m\rfloor, \quad m = 2, 3, 4, \ldots\]
+
+At each such point the floor function increases by 1, so the jump size
+is \[\Delta h(x_m) = e^{-\alpha \ln m} = m^{-\alpha}.\]
+
+The *total variation* is therefore
+\[\operatorname{TV}(h) \;\le\; \underbrace{(1 - e^{-\alpha})}_{\text{smooth part}} + \underbrace{\sum_{m=2}^\infty m^{-\alpha}}_{\text{jump part}} = (1-e^{-\alpha}) + \bigl(\zeta(\alpha)-1\bigr) < \infty,\]
+
+since \(\alpha > 1\) ensures \(\zeta(\alpha)<\infty\). Thus
+\(h\in \mathrm{BV}[0,1]\).
+
+--------------
+
+** Convergence Result
+:PROPERTIES:
+:CUSTOM_ID: convergence-result
+:END:
+By the *Dirichlet--Jordan theorem*: if \(f\in \mathrm{BV}[0,1]\), its
+Fourier series converges pointwise *at every* \(x\) to the symmetric
+average \(\tfrac{1}{2}(f(x^+)+f(x^-))\).
+
+*The Fourier series therefore converges for all \(x\in\mathbb{R}\)*,
+with limit:
+
+| \(x \mod 1\)                                 | Limit of Fourier series                                       |
+|----------------------------------------------+---------------------------------------------------------------|
+| \(\ne \{\ln m\}\) for any integer \(m\ge 2\) | \(h(x)\) (continuity point)                                   |
+| \(= \{\ln m\}\) for some integer \(m\ge 2\)  | \(\dfrac{h(x^+)+h(x^-)}{2} = h(x) - \dfrac{1}{2}m^{-\alpha}\) |
+
+The *exceptional set* \(\mathcal{E} = \{\ln m \bmod 1 : m\ge 2\}\) is
+/dense/ in \([0,1)\) (since \(\ln(m+1)-\ln m\to 0\)), yet it is only
+countable, so the Fourier series still converges *everywhere* --- to
+\(h(x)\) on the complement of \(\mathcal{E}\), and to the midpoint of
+the jump on \(\mathcal{E}\).
+
+--------------
+
+** Summary
+:PROPERTIES:
+:CUSTOM_ID: summary
+:END:
+The specific choice \(\alpha = \log_{10}11\) matters in exactly one way:
+it places \(s_k\) strictly inside the half-plane
+\(\operatorname{Re}(s)>1\), guaranteeing \(\zeta(\alpha)<\infty\) and
+hence \(\operatorname{TV}(h)<\infty\). Any \(\alpha>1\) would give the
+same conclusion. The Fourier series *converges pointwise at every real
+argument*.

@@ -1,0 +1,341 @@
+#+Title: A difficult prime series problem
+#+Author: Victor S. Miller
+#+Date: 2 April, 2026
+#+Email: victorsmiller@gmail.com
+#+Latex_header: \titlegraphic{\large \text{Rutgers Experimental Mathematics Seminar}}
+#+Latex_header: \institute{SRI \& Anduril Industries}
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [presentation]
+#+LANGUAGE:  en
+#+OPTIONS:   H:1 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:https://orgmode.org/org-info.js
+#+columns: %45ITEM %10BEAMER_env(Env) %10BEAMER_act(Act) %4BEAMER_col(Col) %8BEAMER_opt(Opt)
+#+BEAMER_THEME: PaloAlto [height=20pt]
+#+beamer_color_theme:
+#+beamer_font_theme:
+#+beamer_inner_theme:
+#+beamer_outer_theme:
+#+beamer_header:
+#+latex_header: \usepackage{relsize}
+#+latex_header: \newcommand{\cL}{\mathcal{L}}
+#+latex_header: \newcommand{\cS}{\mathcal{S}}
+#+latex_header: \newcommand{\cP}{\mathcal{P}}
+#+latex_header: \DeclareMathOperator{\Log}{Log}
+#+latex_header: \DeclareMathOperator{\sinc}{sinc}
+#+bibliography: ~/BibFiles/digits.bib
+#+bibliography: ~/BibFiles/zeta.bib
+#+bibliography: ~/BibFiles/fourier.bib
+#+cite_export: biblatex backend=bibtex,style=alphabetic,url=true
+
+* A challenge from Neil Sloane                                      :B_quote:
+:PROPERTIES:
+:BEAMER_env: quote
+:END:
+Let $V(n)$ mean: write $n$ in base 10 but read it as if it were
+base 11.  E.g. $V(27) = 2*11 + 7 = 29$. $V(n)$ is A171397.  $V$ is
+interesting because although the harmonic series $\sum 1/n$ diverges,
+it is a classic result that $S1 = \sum 1/V(n)$ converges.  The decimal
+expansion of $S1$ is in A375805, but only 3 decimal places are known.
+
+Second, $V(\text{prime}_n)$ is A031216. What is $S2 = \sum
+1/V(\text{prime}_n)$?  Its value is in A375863, but only 1 decimal
+place is known.  Could someone calculate $S1$ and $S2$ more
+accurately?
+** As William Cheswick always says                                 :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+*"If brute force doesn't work, use more brute force"*.
+* History
+** Kempner (1914)
+[[file:Kempner.png]]
+** Brewster (1953)
+[[file:Brewster.png]]
+* A Good problem is one that teaches
+- Automatic Dirichlet series [cite:@allouche2000automatic]
+- Negative Binomial distribution
+- Incomplete Beta Function
+- Mollification of Fourier Series 
+- Filtering of Fourier Series
+- Beurling-Selberg majorant/minorant [cite:@montgomery1994ten]
+- Mellin transforms and asymptotics [cite:@flajolet1994mellin]
+- Wiener's \(1/f\) theorem [cite:@newman1975simple]
+* Themes in the solution
+- Fourier Series.
+- Riemann zeta function
+\[\zeta(s) = \sum_{n=1}^\infty \frac{1}{n^s}.\]
+- Prime zeta function
+\[P(s) = \sum_{p \text{ prime}} \frac{1}{p^s}.\]
+* Ellipsephic Series and Automatic Dirichlet series
+- After Kempner: huge literature.
+- Series with digit conditions: "Ellipsephic" (due to Christian
+  Mauduit).
+- Many involving hard Analytic Number Theory.
+- None (as far I could find) involve series over primes like the
+  second series.
+* A few words about complexity
+- What is the complexity of finding an $N$ digit approximation to a quantity?
+- Ideally it is polynomial in $N$ (and small degree).
+- In these two problems, brute force is exponential in $N$.
+- The method presented here is also exponential, but with a much
+  smaller base.
+* Summing of Series
+We're summing \(A = \sum_{k=1}^\infty a_k\).
+Brute force: 
+\begin{displaymath}
+A = \underbrace{a_1 + \dots + a_n}_{\textbf{Head}}
+\,+\,\underbrace{a_{n+1} + \dots}_{\textbf{Tail}}
+\end{displaymath}
+- Calculate the /head/ and hope that the /tail/ is negligible.
+- In this case, we'll see that it isn't.
+* The first series
+- Easily handled by methods of Robert Baillie [cite:@baillie1979sums]
+  and Jean-François Burnol [cite:@burnol2025moments].
+- Implicitly involves finite automata and regular languages.
+- Doesn't appear to apply to second sum.
+- "Automaticity": how well a set of words (in our case digits) is
+  approximated by a regular set (larger is worse).
+- Thomas Dubbe [cite:@dubbe2025automaticity] recently proved that the
+  set of prime digits has close to maximal automaticity.
+* Simple Bounds
+- \[\alpha = \frac{\log 11}{\log 10} \approx 1.041392685158225\].
+- \(10^k \le n < 10^{k+1} \Rightarrow 11^k \le n^\alpha < 11^{k+1}\).
+Then
+\[11^k = V(10^k) \le V(n) \le \sum_{j=0}^k 9 \cdot 11^j <
+  \frac{9}{10} 11^{k+1}.\]
+
+Thus
+\[\frac{1}{11} < \frac{V(n)}{n^\alpha} < \frac{99}{10}.\]
+- Write $R(n) := \frac{V(n)}{n^\alpha}$.
+* Why Brute force won't work (in this lifetime)
+** Tail Bounds                                                     :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+From last inequalities, for \(N\) decimal places of accuracy, for the
+first series, needs at least
+\(m = c 10^{N/(\alpha-1)}$ terms, where $c \approx 2.18189 \times 10^{-11}\).
+|-----------------+--------+---------+---------|
+| \(N\)           |      1 |       2 |       3 |
+|-----------------+--------+---------+---------|
+| \(\log_{10} m\) | 13.497 | 37.6565 | 61.8154 |
+|-----------------+--------+---------+---------|
+
+For the prime series we only gain a factor of \(k\). Still not feasible.
+* \(R(n)\) in log scale
+#+caption: It looks periodic (almost: it is in the limit)
+[[file:Rdots.png]]
+* Strategy
+- \(\cP\) is the set of primes.
+- \(\sum_{p \in \cP} \frac{1}{V(p)} = \sum_{p \in \cP}
+  \frac{1}{R(p)p^\alpha}\)
+- Prime zeta function: \(P(s) := \sum_{p \in \cP}
+  \frac{1}{p^s}\) for \(s > 1\).
+- Good algorithms exists for evaluating \(P(s)\).
+- Estimate the tail by using bounds for \(R(n)\).
+- Original bounds only buys 1 extra place of accuracy :-(.
+* Improved Bounds on \(R(n)\)
+*** Improvement
+Using *Karamata's inequality* [cite:@karamata1932inegalite] arguments we can show:
+If \(10^k \le n < 10^{k+1}\) then
+\[1  = R(10^k) \ge R(n) \ge R(10^{k+1} - 1) > \frac{9}{10},\]
+which is asymptotically tight.
+* An Alternate expression
+** A series for \(V(n)\)                                           :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+We have
+\[V(n) = \frac{1}{11} \sum_{m=-\infty}^\infty
+\lfloor 10^m n \rfloor 11^{-m}.\]
+** A periodic function suggested                                   :B_block: 
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+\[F(x) = \frac{1}{11}\sum_{m=-\infty}^\infty \lfloor 10^{m+x} \rfloor 11^{-(m+x)}.\]
+- Periodic with period 1. Let \(X = \{ x \in \mathbb{R} : x \equiv \log n
+  \bmod 1, n \in \mathbb{Z}_{> 0} \}\).
+- \(F(x)\) discontinuous for \(x \in X\), continuous elsewhere.
+- *\(R(n) = F(\log_{10} n)\).*
+* Transferring Fourier coefficients
+- \(f(x)\) is periodic with period \(T\).
+- Fourier series: \(f(x) \approx \sum_{k=-\infty}^\infty c_k
+  e^{\frac{2 \pi i k x}{T}}\).
+- Dirichlet series \(g(s) = \sum_{n=1}^\infty \frac{f(\log n)}{n^s}\)
+- Then \(g(s) \approx \sum_{k=-\infty}^\infty c_k \zeta\left(s - \frac{2 \pi i k}{T}\right)\).
+- Dirichlet series \(h(s) = \sum_{p \text{ prime}} \frac{f(\log p)}{p^s}\)
+- Then \(h(s) \approx \sum_{k=-\infty}^\infty c_k P\left(s - \frac{2 \pi i k}{T}\right)\).
+* Using Leading digits to approximate \(1/F(x)\).
+** Leading Digits                                                  :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+If \(a \ge 1\), say that \(n\) has leading digits \(a\)
+if there is a \(k \ge 0\) such that
+\[a \cdot 10^k \le n < (a+1) \cdot 10^k\]
+- \(\cL(a)\): integer with leading digits $a$.
+- \(\cP_a = \cL(a) \cap \cP\).
+
+Then
+\begin{displaymath}
+\begin{aligned}
+R(a) = R(a \cdot 10^k) & \ge R(n) >
+R((a+1) \cdot 10^k - 1) \\ & \ge R(a)
+\left(\frac{a}{a+1}\right)^\alpha + \frac{9}{10 (a+1)^\alpha} := U(a),
+\end{aligned}
+\end{displaymath}
+* Good estimation
+- Interval $[1/R(a), 1/U(a)]$ very small.
+- When $a$ is big this is a very good approximation.
+[[file:difference.png]]
+* Characteristic function for leading digits.
+- Characteristic function:
+\begin{displaymath}
+\chi_a(x) =
+\begin{cases}
+1 & \text{if } a\cdot 10^k \le 10^x < (a+1) \cdot 10^k \text{ for some } k \\
+0 & \text{otherwise}
+\end{cases}
+\end{displaymath}
+- \(\chi_a(\log_{10} n) = 1\) if and only if $n \in \cL(a)$.
+- Periodic function of $\log_{10} n$.
+- Closed form for Fourier coefficients
+\begin{displaymath}
+\widehat{\chi_{a}}(n) =
+\log_{10}\left({\frac{a+1}{a}}\right)
+\sinc \left(\log_{10}\left({\frac{a+1}{a}}\right)n\right)
+e^{- i \pi \left(\frac{\log(a(a+1))}{\log 10}\right)  n},
+\end{displaymath}
+where the normalized \(\sinc(x) := \frac{\sin(\pi x)}{\pi x}\) when $x \ne 0$ and 1 otherwise.
+
+* Bounds on \(1/F(x)\)
+- Every $n \ge 10^k$ has leading digits among the set \(N_k := \{10^k \le a <   10^{k+1}\}\).
+- Lower bound: \ell_k(x) := \(\sum_{a \in N_k} \frac{1}{R(a)} \chi_a(x)\)
+- Upper bound: u_k(x) := \(\sum_{a \in N_k} \frac{1}{U(a)} \chi_a(x)\)
+- Fourier approximation:
+- \(\ell_k(x) \approx \sum_{j=-r}^r c_{k,j} \exp(2 \pi i j x)\)
+- \(u_k(x) \approx \sum_{j=-r}^r d_{k,j} \exp(2 \pi i j x)\)
+* Estimating the tail
+**                                                                 :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+\begin{displaymath}
+\begin{aligned}
+\, & \sum_{j=-r}^r c_{k,j}
+P^{(k+t)}\left(\alpha - \frac{2 \pi i j} {\log 10}\right) \lessapprox
+\, & \sum_{p \in \cP, p \ge 10^{k + t}} \frac{1}{V(p)} \lessapprox \\
+\, & \sum_{j=-r}^r d_{k,j} P^{(k+t)}\left(\alpha - \frac{2 \pi i j}{\log
+10}\right)
+\end{aligned}
+\end{displaymath}
+**                                                                 :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+Truncated prime zeta
+\[P^{(k)}(s) := \sum_{p \in \cP, p \ge 10^k} \frac{1}{p^s}\]
+* The Prime Zeta Function
+- Riemann zeta function and Prime zeta function
+\begin{displaymath}
+ \zeta(s) := \sum_{n=1}^\infty \frac{1}{n^s}, 
+\, \, P(s) := \sum_{p \text{ prime}} \frac{1}{p^s}, \Re s > 1.
+\end{displaymath}
+- Euler Product
+\[\zeta(s) = \prod_{p \text{ prime}} \left(1 -
+\frac{1}{p^s}\right)^{-1}.\]
+- \[\log \zeta(s) = \sum_{p \text{ prime}} \sum_{n=1}^\infty
+  \frac{1}{n p^{ns}} = \sum_{n=1}^\infty \frac{P(ns)}{n}\]
+holomorphic in \(\Re s > 1\).
+- Möbius inversion:
+\[P(s) = \sum_{n=1}^\infty \mu(n) \frac{\log \zeta(ns)}{n}.\]
+* \(\log \zeta(s)\) versus \(\Log \zeta(s)\).
+- Want to evaluate \(P(s)\) for complex $s$.
+- \(\Log \zeta(s)\): principal value of the logarithm.
+- Would like to say that \(P(s) = \sum_{n=1}^\infty \mu(n) \frac{\Log
+  \zeta(ns)}{n}\).
+- When is \(\log \zeta(s) = \Log \zeta(s)\)?
+- It still holds ([cite:@vandelune1983some], [cite:@de2012note]) when
+  \(\Re s > \sigma_- \approx 1.033908072\). Note that $\alpha >
+  \sigma_-$.
+Here $\sigma_-$ is the unique solution, for $\sigma > 1$ to \[\sum_{p \text{ prime}}
+\arcsin(p^{-\sigma}) = \pi.\]
+* Significant figures
+**                                                                 :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+Using leading digits between $10^4$ and $10^5$ and 50 terms of the
+Fourier series yields the value in the interval
+\((3.0878725218714846, 3.0878855128344616)\):
+\[ 3.0878\dots\]
+#+caption: Fourier series $1/R(a)$: 50 terms
+#+attr_latex: :height 0.50\textheight
+[[file:Fourier Series.png]]
+* Further work
+**                                                             :B_quotation:
+:PROPERTIES:
+:BEAMER_env: quotation
+:END:
+"Il n'y a pas de problèmes résolus ; il y a seulement des problèmes
+plus ou moins résolus." 
+
+“There are no solved problems; there are only problems that are more or less solved.”
+— Henri Poincaré
+** To Do
+- The Fourier series approximation is fairly weak because of jumps in
+  the function (this is inherent).
+- Are there more efficient (i.e. non-exponential) algorithms to calculate an \(N\)-digit approximation?
+- In particular, can we adapt the idea of integrating against the invariant measure (as did Burnol)?
+- Or is the problem of approximating the second sum inherently hard?
+* Acknowledgements
+- Neil Sloane: for posing the problem
+- Jeff Shallit and Jean-Paul Allouche: for helpful discussion about
+  automatic sequences.
+- Fredrik Johansonn: for ~mpmath~ and pointers to papers about
+  computation of the prime zeta function.
+- Juan Arias de Reyna Martinez: for discussions about computation of
+  the prime zeta function.
+* Karamata's Inequality
+** Majorization                                                    :B_definition:
+:PROPERTIES:
+:BEAMER_env: definition
+:END:
+Given two nonincreasing sequences, $x$ and $y$ of length $n$, say that
+$x$ *majorizes* $y$ if $\sigma_j(x) \ge \sigma_j(y)$ for $1 \le j < n$
+and \(\sigma_n(x) = \sigma_n(y)\), where \(\sigma_j(x) := \sum_{i=1}^j
+x_j\). Denote this by \(x \succ y\)
+** Karamata's inequality                                         :B_theorem:
+:PROPERTIES:
+:BEAMER_env: theorem
+:END:
+If \(f\) is a convex function and sequence \(x \succ y\),
+then \(\sigma_n(f(x)) \ge \sigma_n(f(y))\).
+**                                                                 :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+Suggested by ChatGpt. But it got the sense of the inequality wrong!
+* Tight Inequalities
+** Sequences                                                       :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+- \(n = \sum_{i=0}^{k-1} d_i \cdot 10^i\), with \(0 \le d_i < 10\) and \(d_{k-1} > 0\).
+\begin{displaymath}
+\cS(n) := \underbrace{\frac{10^{k-1}}{n}}_{d_{k-1} copies}
+\cdots
+\underbrace{\frac{10^0}{n}}_{{d_0} copies}
+\end{displaymath}
+- \(f(x) = x^\alpha\) - convex.
+- \(\sigma(f(\cS(n))) = R(n)\).
+- \(\cS(a \cdot 10^k)$ (padded with 0's) majorizes \(\cS(a \cdot 10^k +
+  d)\), \(0 \le d < 10^k\): easy.
+- \(\cS(a \cdot 10^k + d)\) majorizes \(\cS((a+1) \cdot 10^k - 1)\): ugly.
+* Bibliography
+:PROPERTIES:
+:BEAMER_opt: allowframebreaks,label=
+:END:
+#+print_bibliography:
