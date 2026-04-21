@@ -3,6 +3,8 @@
   yields error bounds that are indicated.
 """
 from typing import List, Iterable
+from functools import partial
+from collections import defaultdict
 import mpmath as mp
 from heapq import heapify, heappop, heappush
 
@@ -20,9 +22,12 @@ class Interval:
         self._from_base = from_base
         self._to_base = to_base
         expon = mp.log(self._to_base) / log(self._from_base)
-        self._left = self._expanded / mp.mpf(self._leading + 1) ** expon
-        self._right = ((self._expanded + ((self._from_base - 1) / (self._to_base - 1))
-            / mp.mpf(self._leading) ** expon))
+        twiddle = mp.mpf(self._from_base - 1) / mp.mpf(self._to_base - 1)
+        self._right = self._expanded / mp.mpf(self._leading) ** expon
+        self._left = (self._expanded + twiddle) / mp.mpf(self._leading + 1) ** expon
+        # self._left = self._expanded / mp.mpf(self._leading + 1) ** expon
+        # self._right = ((self._expanded + ((self._from_base - 1) / (self._to_base - 1))
+        #     / mp.mpf(self._leading) ** expon))
         # self._key = self._right / self._left
         self._key = 1 / self._left - 1 / self._right
     def __lt__(self, other: Interval | float) -> bool:
@@ -69,7 +74,18 @@ def covers(precision: mp.mpf,
                                   from_base = from_base,
                                   to_base = to_base))
 
-def check_cover(cover: List[int]) -> bool:
+def pseudo_valuation(base: int, arg: int) -> int | None:
+    if arg == 0:
+        return None
+    xarg = arg
+    val = 0
+    while True:
+        if xarg % base != 0:
+            return val
+        xarg //= base
+        val += 1
+
+def check_cover(base: int, cover: List[int]) -> bool:
     """
       Given a list of positive integers, check the following:
       1) No member is prefix of any other
@@ -89,4 +105,8 @@ def check_cover(cover: List[int]) -> bool:
       is {((a // b) + c , j) for 0 <= c < b} where j satisfies
       b^j <= a < b^{j+1}.
     """
-    pass
+    tab = defaultdict(list)
+    val = partial(pseudo_valuation, base)
+    for cvr in cover:
+        tab[val(cvr)].append(cvr)
+    

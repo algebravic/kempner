@@ -1,6 +1,6 @@
 [project]
 name = "kempner"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
 authors = [{ name = "Victor S. Miller", email = "victor.miller@sri.com" }]
 requires-python = ">=3.13"
@@ -17,6 +17,7 @@ dependencies = [
     "dask>=2025.9.1",
     "psutil>=7.1.0",
     "chebpy",
+    "finufft>=2.5.1",
 ]
 
 [tool.uv]

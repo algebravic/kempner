@@ -62,7 +62,9 @@ def power_table(limit: int,
         table[::stride] += lstride
         stride *= from_base
         lstride *= to_base
+    # table[0] is junk
     return table
+
 
 def expand_table(limit: int,
                  from_base: int, to_base: int) -> np.ndarray:
@@ -94,6 +96,17 @@ def expand_table(limit: int,
         ofence *= to_base
     return table
 
+def normalized_values(limit: int, from_base: int, to_base: int) -> np.ndarray:
+
+    alpha = mp.log(to_base) / mp.log(from_base)
+    twiddle = mp.mpf(from_base - 1) / mp.mpf(to_base - 1)
+    offset = mp.mpf(from_base - 1) / (2 * mp.mpf(to_base - 1))
+    table = expand_table(limit, from_base, to_base)
+    ptable = power_table(limit, from_base, to_base)
+    mmpf = np.vectorize(lambda _: mp.mpf(int(_)))
+    return (mmpf(table) - offset * mmpf(ptable))[1:] / mmpf(np.arange(1, len(table))) ** alpha
+
+    
 def digit_bounds(from_base: int, to_base: int, deg: int) -> np.ndarray:
 
     mpf = np.vectorize(lambda _: mp.mpf(int(_)))
