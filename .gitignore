@@ -9,3 +9,4 @@
 /doc/*.blg
 /doc/*blx.bib
 /doc/test.org
+/primecache.dat/
