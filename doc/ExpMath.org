@@ -123,7 +123,7 @@ first series, needs at least
 | \(\log_{10} m\) | 13.497 | 37.6565 | 61.8154 |
 |-----------------+--------+---------+---------|
 
-For the prime series we only gain a factor of \(k\). Still not feasible.
+For the prime series we only gain a factor of \(N\). Still not feasible.
 * \(R(n)\) in log scale
 #+caption: It looks periodic (almost: it is in the limit)
 [[file:Rdots.png]]
